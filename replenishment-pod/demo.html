@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Replenishment Pod Demo</title><!-- POD:TITLE -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --sf-primary: #1A6FC4;
+    --sf-light: #2EA0E0;
+    --sf-bright: #35B8F0;
+    --sf-navy: #0B1628;
+    --sf-charcoal: #1E2A3A;
+    --sf-slate: #3A4A5C;
+    --sf-mid: #6B7B8D;
+    --sf-bg-alt: #F2F4F7;
+    --sf-off: #FAFBFC;
+    --ok: #16A34A;
+    --ok-soft: #DCFCE7;
+    --warn: #B45309;
+    --warn-soft: #FEF3C7;
+    --err: #DC2626;
+    --err-soft: #FEE2E2;
+    --line: #DCE2EA;
+    /* tenant-facing brand, swapped by the white-label beat */
+    --b-primary: #1A6FC4;
+    --b-accent: #2EA0E0;
+    --b-soft: #E8F1FB;
+    --b-nav: #0B1628;
+    --sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    color-scheme: light;
+  }
+  body.brand-northstar {
+    --b-primary: #1F4E79;
+    --b-accent: #F2A900;
+    --b-soft: #FDF4DC;
+    --b-nav: #10263D;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { background: var(--sf-off); color: var(--sf-slate); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+  button { font-family: inherit; }
+  :focus-visible { outline: 2px solid var(--sf-light); outline-offset: 2px; }
+
+  /* Presenter bar */
+  .topbar { display: flex; align-items: center; gap: 16px; padding-inline: 20px; padding-block: 10px; background: #fff; border-bottom: 1px solid var(--line); flex-wrap: wrap; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+  .topbar img { height: 30px; width: auto; display: block; }
+  .topbar .ttl { font-weight: 600; color: var(--sf-navy); font-size: 14px; }
+  .topbar .sub { color: var(--sf-mid); font-size: 12.5px; }
+  .topbar .grow { flex: 1; }
+  .ctrl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .btn { border: 1px solid var(--line); background: #fff; color: var(--sf-navy); border-radius: 6px; padding: 6px 12px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .btn:hover { border-color: var(--sf-light); }
+  .btn.primary { background: var(--sf-primary); color: #fff; border-color: var(--sf-primary); }
+  .btn.primary:hover { background: #155CA3; }
+  .btn[aria-pressed="true"] { background: var(--sf-navy); color: #fff; border-color: var(--sf-navy); }
+  .counter { font-family: var(--mono); font-size: 12px; color: var(--sf-mid); min-width: 52px; text-align: center; }
+
+  .stage { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; padding-inline: 20px; padding-block: 20px 32px; max-width: 1480px; margin: 0 auto; }
+  @media (max-width: 980px) { .stage { grid-template-columns: 1fr; } }
+
+  /* Narration */
+  .narr { display: flex; flex-direction: column; gap: 14px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .beat-no { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--sf-primary); margin-bottom: 4px; }
+  .beat-title { font-size: 18px; font-weight: 600; color: var(--sf-navy); line-height: 1.3; margin: 0 0 8px; text-wrap: balance; }
+  .vo { font-size: 14.5px; color: var(--sf-slate); margin: 0 0 10px; }
+  .proves { font-size: 12.5px; color: var(--sf-mid); border-top: 1px solid var(--line); padding-top: 8px; }
+  .proves b { color: var(--sf-navy); font-weight: 600; }
+  .who { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; background: var(--sf-bg-alt); border-radius: 999px; padding: 2px 10px; color: var(--sf-slate); margin-bottom: 10px; }
+  .beats { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow: auto; }
+  .beats li button { width: 100%; text-align: left; border: 0; background: none; padding: 6px 8px; border-radius: 5px; display: grid; grid-template-columns: 24px 1fr; gap: 6px; font-size: 13px; color: var(--sf-slate); cursor: pointer; }
+  .beats li button:hover { background: var(--sf-bg-alt); }
+  .beats li button.on { background: #E8F1FB; color: var(--sf-navy); font-weight: 600; }
+  .beats .n { font-family: var(--mono); font-size: 11.5px; color: var(--sf-mid); padding-top: 1px; }
+  .beats .sect { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--sf-mid); padding: 10px 8px 2px; }
+  .hint { font-size: 12px; color: var(--sf-mid); }
+  .hint kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; background: #fff; }
+
+  /* Browser frame */
+  .frame { background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: 0 8px 30px rgba(11,22,40,.08); display: flex; flex-direction: column; min-height: 640px; }
+  .chrome { display: flex; align-items: center; gap: 10px; background: #EEF1F5; border-bottom: 1px solid var(--line); padding: 8px 12px; }
+  .dots { display: flex; gap: 6px; }
+  .dots i { width: 10px; height: 10px; border-radius: 50%; background: #CBD3DC; display: block; }
+  .url { flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; font-family: var(--mono); font-size: 12px; color: var(--sf-slate); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .url .lock { color: var(--ok); margin-right: 6px; }
+  .tag-surface { font-size: 11px; font-family: var(--mono); padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .tag-surface.portal { background: var(--b-soft); color: var(--b-primary); }
+  .tag-surface.console { background: #EEF0F2; color: #4B5563; }
+  .tag-surface.one { background: #EEF0F2; color: #4B5563; }
+  .screen { flex: 1; display: flex; min-height: 0; }
+
+  /* Portal (tenant-facing, branded) */
+  .p-nav { width: 210px; background: var(--b-nav); color: #D7E1EC; display: flex; flex-direction: column; padding: 14px 10px; gap: 4px; flex-shrink: 0; }
+  .p-brand { display: flex; align-items: center; gap: 8px; padding: 4px 8px 14px; }
+  .p-brand .logo-chip { background: #fff; border-radius: 6px; padding: 4px 6px; display: flex; align-items: center; }
+  .p-brand .logo-chip img { height: 22px; width: auto; display: block; }
+  .p-brand .ns { display: none; align-items: center; gap: 8px; color: #fff; font-weight: 600; font-size: 15px; }
+  body.brand-northstar .p-brand .sf { display: none; }
+  body.brand-northstar .p-brand .ns { display: flex; }
+  .p-nav a { display: flex; align-items: center; gap: 10px; color: #C9D4E0; text-decoration: none; padding: 8px 10px; border-radius: 6px; font-size: 13.5px; }
+  .p-nav a.on { background: rgba(255,255,255,.1); color: #fff; box-shadow: inset 3px 0 0 var(--b-accent); }
+  .p-sect { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #8FA2B6; padding: 12px 10px 4px; }
+  .pods { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .pod { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; background: #fff; }
+  .pod.live { border-color: var(--b-primary); box-shadow: 0 0 0 1px var(--b-primary) inset; }
+  .pod .ph { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .pod .pn { font-weight: 600; color: var(--sf-navy); font-size: 15px; }
+  .pod .pd { font-size: 12.5px; color: var(--sf-mid); min-height: 36px; }
+  .pod dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; font-size: 12.5px; }
+  .pod dt { color: var(--sf-mid); }
+  .pod dd { margin: 0; color: var(--sf-navy); font-variant-numeric: tabular-nums; }
+  .pod .pstage { display: flex; gap: 4px; }
+  .pod .pstage i { flex: 1; height: 4px; border-radius: 2px; background: var(--sf-bg-alt); }
+  .pod .pstage i.on { background: var(--b-primary); }
+  .pod .open { margin-top: auto; font-size: 12.5px; font-weight: 600; color: var(--b-primary); }
+  .shared { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .shared .tile b { color: var(--sf-navy); font-size: 13px; }
+  .shared .uses { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .p-nav .tenant { margin-top: auto; font-size: 12px; color: #9FB0C3; padding: 8px 10px; border-top: 1px solid rgba(255,255,255,.1); }
+  .p-nav .tenant b { color: #fff; font-weight: 600; display: block; }
+  .p-main { flex: 1; min-width: 0; padding: 22px 26px; background: #fff; overflow: auto; }
+  .p-h { font-size: 20px; font-weight: 600; color: var(--sf-navy); margin: 0 0 4px; }
+  .p-sub { color: var(--sf-mid); margin: 0 0 18px; font-size: 13px; }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .tile { flex: 1 1 160px; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .tile .k { font-size: 12px; color: var(--sf-mid); }
+  .tile .v { font-size: 22px; font-weight: 600; color: var(--sf-navy); font-variant-numeric: tabular-nums; }
+  .tile .d { font-size: 12px; color: var(--sf-mid); }
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.err { background: var(--err-soft); color: var(--err); }
+  .pill.b { background: var(--b-soft); color: var(--b-primary); }
+  .pill.n { background: var(--sf-bg-alt); color: var(--sf-slate); }
+  .pbtn { background: var(--b-primary); color: #fff; border: 0; border-radius: 6px; padding: 8px 14px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .pbtn.ghost { background: #fff; color: var(--b-primary); border: 1px solid var(--b-primary); }
+  .pbtn:disabled { background: #C9D1DA; color: #fff; cursor: not-allowed; border-color: #C9D1DA; }
+
+  table.t { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.t th { text-align: left; font-weight: 600; font-size: 11.5px; color: var(--sf-mid); text-transform: uppercase; letter-spacing: .04em; padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--sf-bg-alt); }
+  table.t td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.t td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .mono { font-family: var(--mono); font-size: 12px; }
+  .tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+
+  .search { display: flex; gap: 8px; margin-bottom: 14px; }
+  .search .in { flex: 1; border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px; font-size: 14px; color: var(--sf-navy); background: #fff; }
+  .res { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; }
+  .res.top { border-color: var(--b-primary); box-shadow: 0 0 0 1px var(--b-primary) inset; }
+  .res .sku { font-family: var(--mono); font-size: 12.5px; color: var(--b-primary); font-weight: 500; }
+  .res .desc { color: var(--sf-navy); font-weight: 500; }
+  .res .meta { font-size: 12px; color: var(--sf-mid); grid-column: 1 / -1; }
+  .res .score { font-family: var(--mono); font-size: 12px; color: var(--sf-mid); text-align: right; }
+  .cite { font-family: var(--mono); font-size: 11px; color: var(--sf-mid); background: var(--sf-bg-alt); border-radius: 4px; padding: 1px 6px; }
+
+  .mail { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .mail .hd { background: var(--sf-bg-alt); padding: 10px 14px; font-size: 12.5px; border-bottom: 1px solid var(--line); }
+  .mail .hd b { color: var(--sf-navy); }
+  .mail pre { margin: 0; padding: 12px 14px; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; color: var(--sf-navy); line-height: 1.55; }
+  .inbox { width: 250px; flex-shrink: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .inbox div { padding: 9px 12px; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+  .inbox div:last-child { border-bottom: 0; }
+  .inbox div.on { background: var(--b-soft); box-shadow: inset 3px 0 0 var(--b-primary); }
+  .inbox b { display: block; color: var(--sf-navy); font-weight: 600; font-size: 12.5px; }
+  .inbox span { color: var(--sf-mid); }
+
+  .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .steps li { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; align-items: start; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: #fff; transition: opacity .3s; }
+  .steps li.pending { opacity: .35; }
+  .steps .ic { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #fff; background: var(--sf-mid); }
+  .steps li.done .ic { background: var(--ok); }
+  .steps li.flag .ic { background: #D97706; }
+  .steps .st { font-weight: 600; color: var(--sf-navy); font-size: 13px; }
+  .steps .sd { font-size: 12.5px; color: var(--sf-slate); }
+  .steps .svc { font-family: var(--mono); font-size: 11px; color: var(--sf-mid); white-space: nowrap; }
+  .flagbox { border: 1px solid #F5C77E; background: #FFFBEB; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #7C4A03; margin-block: 12px; }
+
+  /* Console (unbranded) */
+  .c-wrap { flex: 1; display: flex; flex-direction: column; background: #F7F8FA; min-width: 0; }
+  .c-top { background: #fff; border-bottom: 1px solid #E3E6EA; padding: 10px 18px; display: flex; align-items: center; gap: 12px; font-size: 13px; flex-wrap: wrap; }
+  .c-top b { color: #111827; }
+  .c-top .muted { color: #6B7280; }
+  .c-body { padding: 18px; overflow: auto; }
+  .c-h { font-size: 16px; font-weight: 600; color: #111827; margin: 0 0 12px; }
+  .c-card { background: #fff; border: 1px solid #E3E6EA; border-radius: 6px; padding: 14px; margin-bottom: 14px; }
+  .code { font-family: var(--mono); font-size: 12px; background: #0F172A; color: #E2E8F0; border-radius: 6px; padding: 10px 12px; white-space: pre; overflow-x: auto; }
+
+  /* One studio */
+  .one-wrap { flex: 1; display: flex; flex-direction: column; background: #F5F7FA; min-width: 0; }
+  .flow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-block: 8px 16px; }
+  .node { background: #fff; border: 1px solid #D5DBE3; border-radius: 6px; padding: 8px 10px; font-size: 12.5px; color: #1F2937; }
+  .node small { display: block; color: #6B7280; font-size: 11px; font-family: var(--mono); }
+  .arrow { color: #9CA3AF; }
+  .gate { border-radius: 8px; padding: 14px; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; }
+  .gate.blocked { background: var(--err-soft); border: 1px solid #FCA5A5; }
+  .gate.passed { background: var(--ok-soft); border: 1px solid #86EFAC; }
+  .gate .big { font-size: 22px; font-weight: 700; }
+  .gate.blocked .big { color: var(--err); }
+  .gate.passed .big { color: var(--ok); }
+
+  /* Sign-in */
+  .signin { flex: 1; display: grid; place-items: center; background: linear-gradient(135deg, var(--b-nav) 0%, var(--b-primary) 100%); padding: 30px 16px; }
+  .signin .box { background: #fff; border-radius: 10px; padding: 28px; width: min(360px, 100%); box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+  .signin img { height: 34px; width: auto; }
+  .signin .ns-logo { display: none; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: var(--b-nav); }
+  body.brand-northstar .signin img { display: none; }
+  body.brand-northstar .signin .ns-logo { display: flex; }
+  .field { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; font-size: 12.5px; color: var(--sf-mid); }
+  .field span.v { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; color: var(--sf-navy); font-size: 14px; }
+
+  .bar { height: 8px; background: var(--sf-bg-alt); border-radius: 4px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--b-primary); border-radius: 4px; transition: width .6s ease; }
+  .cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .spot { animation: spot 1.6s ease-in-out 2; }
+  @keyframes spot { 0%,100% { box-shadow: 0 0 0 0 rgba(46,160,224,0); } 50% { box-shadow: 0 0 0 5px rgba(46,160,224,.35); } }
+  @media (prefers-reduced-motion: reduce) { .spot { animation: none; } .bar i, .steps li { transition: none; } }
+  @media (max-width: 720px) {
+    .p-nav { width: 64px; }
+    .p-nav a span.lbl, .p-nav .tenant, .p-sect, .p-brand .ns span { display: none; }
+    .p-brand .logo-chip img { height: 16px; }
+    .inbox { width: 100%; }
+    .p-main { padding: 16px; }
+  }
+  .tag-surface.eng { background: #1F2937; color: #E5E7EB; }
+  .eng-wrap { flex: 1; display: flex; flex-direction: column; min-width: 0; background: #0D1117; color: #E6EDF3; }
+  .eng-top { display: flex; align-items: center; gap: 10px; padding: 9px 16px; border-bottom: 1px solid #243041; font-size: 12.5px; color: #9FB1C4; flex-wrap: wrap; }
+  .eng-top b { color: #E6EDF3; }
+  .eng-body { padding: 16px 18px; overflow: auto; flex: 1; }
+  .term { font-family: var(--mono); font-size: 12.5px; line-height: 1.65; white-space: pre-wrap; color: #D6DEE8; }
+  .term .p { color: #7EE787; }
+  .term .c { color: #79C0FF; }
+  .term .d { color: #8B98A8; }
+  .term .ok { color: #7EE787; }
+  .term .w { color: #F2CC60; }
+  .term .e { color: #FF7B72; }
+  .codev { font-family: var(--mono); font-size: 12.3px; line-height: 1.6; white-space: pre; overflow-x: auto; color: #D6DEE8; background: #0D1117; }
+  .codev .k { color: #79C0FF; }
+  .codev .s { color: #A5D6FF; }
+  .codev .cm { color: #8B98A8; }
+  .codev .hl { background: rgba(242, 204, 96, .14); display: inline-block; width: 100%; }
+  .lf-row { display: grid; grid-template-columns: minmax(0, 1fr) 90px 90px 80px; gap: 8px; padding: 6px 10px; border-bottom: 1px solid #1E2733; font-size: 12.3px; align-items: center; }
+  .lf-row.hd { color: #8B98A8; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+  .lf-row .nm { font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lf-row .num { text-align: right; font-variant-numeric: tabular-nums; color: #C9D4E0; }
+  .lf-bar { height: 6px; background: #2F81F7; border-radius: 3px; }
+  .lf-kind { font-size: 10.5px; font-family: var(--mono); padding: 1px 6px; border-radius: 4px; background: #1F2A37; color: #9FB1C4; margin-right: 6px; }
+  .lf-kind.gen { background: #1B2F4F; color: #79C0FF; }
+  .lf-kind.tool { background: #2A2440; color: #D2A8FF; }
+  .lf-kind.guard { background: #16321F; color: #7EE787; }
+  .lf-kind.wait { background: #3B2E10; color: #F2CC60; }
+  .gh-check { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #1E2733; align-items: start; font-size: 13px; }
+  .gh-check .ic { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #0D1117; }
+  .gh-check .ic.ok { background: #3FB950; }
+  .gh-check .ic.bad { background: #F85149; }
+  .gh-check small { display: block; color: #8B98A8; font-size: 12px; }
+  .gh-box { border: 1px solid #243041; border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+  .gh-merge { padding: 12px; font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .gh-btn { border: 0; border-radius: 6px; padding: 7px 12px; font-weight: 600; font-size: 12.5px; }
+  .gh-btn.dis { background: #21262D; color: #6E7681; }
+  .gh-btn.go { background: #238636; color: #fff; }
+  .sec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  /* Voice pod additions */
+  .tx { display: flex; flex-direction: column; gap: 6px; }
+  .tx .ln { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 6px 10px; border-radius: 6px; transition: opacity .3s; font-size: 13.3px; }
+  .tx .ln.pending { opacity: 0; }
+  .tx .ln .sp { font-size: 11.5px; font-weight: 600; color: var(--sf-mid); padding-top: 1px; }
+  .tx .ln.agent { background: var(--b-soft); }
+  .tx .ln.agent .sp { color: var(--b-primary); }
+  .tx .ln.caller .sp { color: var(--sf-navy); }
+  .tx .ln.tool { background: #F5F0FF; font-family: var(--mono); font-size: 12px; color: #4C2A85; }
+  .tx .ln.tool .sp { color: #7C3AED; font-family: var(--sans); }
+  .tx .ln.sys { background: var(--sf-bg-alt); font-size: 12.5px; color: var(--sf-slate); }
+  .tx .ln.sys .sp { color: var(--sf-mid); }
+  .tx .ln.xfer { background: var(--warn-soft); color: #7C4A03; font-size: 12.5px; }
+  .tx .ln.xfer .sp { color: var(--warn); }
+  .tx .ms { font-family: var(--mono); font-size: 11px; color: var(--sf-mid); white-space: nowrap; }
+  .twocol { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 1100px) { .twocol { grid-template-columns: 1fr; } }
+  .side { display: flex; flex-direction: column; gap: 12px; }
+  .side .tile { flex: none; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 12.8px; margin: 0; }
+  .kv dt { color: var(--sf-mid); }
+  .kv dd { margin: 0; color: var(--sf-navy); font-variant-numeric: tabular-nums; }
+  .h3 { font-size: 14px; color: var(--sf-navy); margin: 0 0 8px; font-weight: 600; }
+  .note { font-size: 12px; color: var(--sf-mid); margin-top: 10px; }
+  .hb { display: flex; flex-direction: column; gap: 5px; }
+  .hb-row { display: grid; grid-template-columns: 230px minmax(0, 1fr) 64px 56px; gap: 10px; align-items: center; font-size: 12.8px; }
+  .hb-row .lbl { color: var(--sf-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hb-row .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--sf-slate); }
+  .hb-row .track { height: 12px; background: var(--sf-bg-alt); border-radius: 3px; overflow: hidden; }
+  .hb-row .track i { display: block; height: 100%; background: var(--b-primary); border-radius: 3px; width: 0; transition: width .7s ease; }
+  .hb-row .track i.alt { background: #F59E0B; }
+  .fam { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .fam div { border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 6px; padding: 8px 10px; font-size: 12.5px; background: #fff; }
+  .fam div b { display: block; color: var(--sf-navy); font-size: 13px; }
+  .fam div.sel { box-shadow: 0 0 0 2px var(--b-primary) inset; }
+  .player { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+  .player .play { width: 30px; height: 30px; border-radius: 50%; background: var(--b-primary); color: #fff; display: grid; place-items: center; font-size: 12px; flex-shrink: 0; }
+  .wave { flex: 1; display: flex; align-items: center; gap: 2px; height: 30px; min-width: 0; overflow: hidden; }
+  .wave i { flex: 1; min-width: 2px; background: #B9CCE3; border-radius: 1px; }
+  .wave i.pl { background: var(--b-primary); }
+  .tr { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .tr-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 76px; gap: 10px; padding: 7px 12px; border-bottom: 1px solid var(--line); font-size: 12.5px; align-items: center; }
+  .tr-row:last-child { border-bottom: 0; }
+  .tr-row.hd { background: var(--sf-bg-alt); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--sf-mid); font-weight: 600; }
+  .tr-row .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--sf-navy); }
+  .tr-row .num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); font-size: 12px; }
+  .tr-row .bar2 { position: relative; height: 10px; }
+  .tr-row .bar2 i { position: absolute; top: 0; height: 10px; border-radius: 3px; background: var(--b-primary); }
+  .tr-row .bar2 i.k-stt { background: #0EA5E9; }
+  .tr-row .bar2 i.k-llm { background: #1A6FC4; }
+  .tr-row .bar2 i.k-tts { background: #16A34A; }
+  .tr-row .bar2 i.k-tool { background: #7C3AED; }
+  .tr-row .bar2 i.k-kb { background: #F59E0B; }
+  .tr-row.hl { background: #F5FAFF; }
+  .kind { font-size: 10.5px; font-family: var(--mono); padding: 1px 6px; border-radius: 4px; margin-right: 6px; color: #fff; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--sf-mid); margin-top: 8px; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--c); margin-right: 5px; vertical-align: -1px; }
+  .form { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px 14px; font-size: 13px; align-items: center; }
+  .form .l { color: var(--sf-mid); font-size: 12.5px; }
+  .form .v { border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; color: var(--sf-navy); background: #fff; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+  .tabs span { padding: 7px 12px; font-size: 13px; color: var(--sf-mid); border-bottom: 2px solid transparent; }
+  .tabs span.on { color: var(--b-primary); border-color: var(--b-primary); font-weight: 600; }
+  .toast { display: flex; gap: 10px; align-items: center; background: var(--ok-soft); border: 1px solid #86EFAC; color: #14532D; border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-block: 12px; }
+  .say { border-left: 3px solid var(--b-primary); background: var(--b-soft); padding: 10px 12px; border-radius: 0 6px 6px 0; font-size: 13.5px; color: var(--sf-navy); }
+  .funnel { display: flex; flex-direction: column; gap: 6px; }
+  .funnel .fr { display: grid; grid-template-columns: 200px minmax(0, 1fr) 70px; gap: 10px; align-items: center; font-size: 12.8px; }
+  .funnel .fr .track { height: 20px; background: var(--sf-bg-alt); border-radius: 4px; overflow: hidden; }
+  .funnel .fr .track i { display: block; height: 100%; background: var(--b-primary); width: 0; transition: width .7s ease; }
+  .funnel .fr .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--sf-navy); font-weight: 600; }
+  .finding { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; margin-bottom: 8px; }
+  .finding a { color: var(--b-primary); font-size: 12px; text-decoration: none; white-space: nowrap; }
+  .phone { border: 1px solid var(--line); border-radius: 16px; padding: 12px; background: #F7F8FA; display: flex; flex-direction: column; gap: 8px; }
+  .bub { max-width: 82%; padding: 8px 11px; border-radius: 14px; font-size: 13px; line-height: 1.4; }
+  .bub.in { background: #fff; border: 1px solid var(--line); align-self: flex-start; }
+  .bub.out { background: var(--b-primary); color: #fff; align-self: flex-end; }
+  .bub.t { align-self: center; background: none; font-family: var(--mono); font-size: 11px; color: #7C3AED; padding: 0; }
+  .cmp2 td.good { color: var(--ok); font-weight: 600; }
+  .cmp2 td.bad { color: var(--err); }
+  .sig { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .sig .sso { display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line); border-radius: 6px; padding: 9px; font-size: 13.5px; color: var(--sf-navy); font-weight: 500; background: #fff; }
+  .sig .sso.spot { border-color: var(--b-primary); }
+  .gatebar { display: grid; grid-template-columns: 90px minmax(0, 1fr) 70px; gap: 10px; align-items: center; font-size: 12.8px; margin-bottom: 6px; }
+  .gatebar .track { height: 12px; background: var(--sf-bg-alt); border-radius: 3px; position: relative; overflow: visible; }
+  .gatebar .track i { display: block; height: 100%; border-radius: 3px; width: 0; transition: width .8s ease; background: var(--ok); }
+  .gatebar .track i.bad { background: var(--err); }
+  .gatebar .track b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--sf-navy); }
+  @media (max-width: 720px) {
+    .hb-row { grid-template-columns: 120px minmax(0, 1fr) 48px; }
+    .hb-row .num.x { display: none; }
+    .funnel .fr { grid-template-columns: 120px minmax(0, 1fr) 56px; }
+    .form { grid-template-columns: 1fr; }
+    .tr-row { grid-template-columns: minmax(0, 1fr) 70px; }
+    .tr-row .bar2 { display: none; }
+  }
+  .gsearch { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; margin: -6px 0 18px; background: var(--sf-off); font-size: 13px; color: var(--sf-mid); }
+  .gsearch.on { border-color: var(--b-primary); box-shadow: 0 0 0 3px var(--b-soft); background: #fff; color: var(--sf-navy); }
+  .gsearch .q { flex: 1; min-width: 0; font-family: var(--mono); }
+  .gsearch kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; background: #fff; color: var(--sf-mid); }
+  .drop { border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 10px 30px rgba(11,22,40,.10); margin: -10px 0 16px; overflow: hidden; }
+  .drop .grp { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--sf-mid); background: var(--sf-bg-alt); padding: 6px 12px; font-weight: 600; }
+  .drop .it { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 12px; padding: 9px 12px; border-top: 1px solid var(--line); font-size: 13px; align-items: center; }
+  .drop .it.on { background: var(--b-soft); box-shadow: inset 3px 0 0 var(--b-primary); }
+  .drop .it b { color: var(--sf-navy); }
+  .drop mark { background: #FEF08A; color: inherit; border-radius: 2px; padding: 0 1px; }
+  .stack { display: flex; height: 26px; border-radius: 6px; overflow: hidden; margin: 6px 0 8px; }
+  .stack i { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11.5px; font-style: normal; font-weight: 600; white-space: nowrap; overflow: hidden; }
+  .big-num { font-size: 26px; font-weight: 700; color: var(--sf-navy); font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .p-nav a .lbl { flex: 1; }
+  .nb { font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: rgba(255,255,255,.12); color: #C9D4E0; white-space: nowrap; }
+  .nb.g { background: rgba(22,163,74,.22); color: #86EFAC; }
+  .nb.a { background: rgba(245,158,11,.22); color: #FCD34D; }
+  .nb.b { background: rgba(46,160,224,.25); color: #9BD7F5; }
+  .nb .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4ADE80; margin-right: 4px; vertical-align: 1px; }
+  @media (max-width: 720px) { .nb { display: none; } }
+  .cdiag { border: 1px solid var(--line); border-radius: 10px; padding: 8px; background: #fff; overflow-x: auto; }
+  .cdiag svg { display: block; width: 100%; min-width: 620px; height: auto; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="data:image/jpeg;base64,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" alt="SectorFlow">
+  <div>
+    <!-- POD:TOPBAR START -->
+    <div class="ttl">Replenishment pod</div>
+    <div class="sub">Sample client: Harborline Supply · demand, stock and purchase orders for a mid-market distributor</div>
+    <!-- POD:TOPBAR END -->
+  </div>
+  <div class="grow"></div>
+  <div class="ctrl">
+    <button class="btn" id="prev" aria-label="Previous beat">Back</button>
+    <span class="counter" id="counter">1 / 27</span>
+    <button class="btn primary" id="next" aria-label="Next beat">Next</button>
+    <button class="btn" id="auto" aria-pressed="false">Autoplay</button>
+    <button class="btn" id="pathbtn" aria-pressed="false" title="Short path for first meetings">First meeting (7)</button>
+  </div>
+</header>
+
+<main class="stage">
+  <aside class="narr">
+    <div class="card" id="narr" aria-live="polite"></div>
+    <div class="card">
+      <ul class="beats" id="beats"></ul>
+    </div>
+    <p class="hint">Keys: <kbd>←</kbd> <kbd>→</kbd> step, <kbd>P</kbd> autoplay. Link to a beat with <span class="mono">#step5</span>; add <span class="mono">-first</span> for the short path. Harborline Supply is a fictional sample client. All data is illustrative.</p>
+  </aside>
+
+  <section class="frame" aria-label="Product screen">
+    <div class="chrome">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="url" id="url"></div>
+      <span class="tag-surface portal" id="surface">Your pod portal</span>
+    </div>
+    <div class="screen" id="screen"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var LOGO = "data:image/jpeg;base64,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";
+  /* === POD CONFIG START: change per pod === */
+  var CLIENT = { name: "Harborline Supply", host: "harborline.sectorflow.ai", pod: "Replenishment pod" };
+  var USER = "Supply Planning lead";
+  /* === POD CONFIG END === */
+
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function pill(c, t) { return '<span class="pill ' + c + '">' + t + '</span>'; }
+  function tile(k, v, d) { return '<div class="tile"><div class="k">' + k + '</div><div class="v">' + v + '</div>' + (d ? '<div class="d">' + d + '</div>' : "") + '</div>'; }
+  function table(head, rows, cls) {
+    return '<div class="tw"><table class="t ' + (cls || "") + '"><thead><tr>' + head.map(function (h) {
+      var n = h.charAt(0) === "#"; return '<th' + (n ? ' style="text-align:right"' : "") + '>' + (n ? h.slice(1) : h) + '</th>';
+    }).join("") + '</tr></thead><tbody>' + rows.map(function (r) {
+      return '<tr>' + r.map(function (c, k) { var n = head[k].charAt(0) === "#"; return '<td' + (n ? ' class="num"' : "") + '>' + c + '</td>'; }).join("") + '</tr>';
+    }).join("") + '</tbody></table></div>';
+  }
+
+  function portal(active, body, user, q) {
+    /* POD:NAV items: [key, label, icon, status badge]. Keep Overview first, Security and Compliance last. */
+    var items = [["home", "Overview", "&#9636;", ""], ["queue", "Proposals", "&#9776;", '<span class="nb a">14 to review</span>'], ["exceptions", "Exceptions", "&#9888;", '<span class="nb a">3 new</span>'],
+      ["agents", "Agents", "&#9881;", '<span class="nb g">4 live</span>'], ["runs", "History", "&#8634;", '<span class="nb g"><span class="dot"></span>1 running</span>'], ["knowledge", "Knowledge", "&#9906;", '<span class="nb g">synced</span>'], ["promos", "Promotions", "&#9733;", '<span class="nb b">1 upcoming</span>'],
+      ["rules", "Reorder rules", "&#9998;", ""], ["quality", "Quality", "&#10003;", '<span class="nb a">2 to review</span>'], ["releases", "Releases", "&#8635;", '<span class="nb b">1 pending</span>'], ["analytics", "The number", "&#9650;", ""],
+      ["security", "Security", "&#9741;", '<span class="nb g">ok</span>'], ["compliance", "Compliance", "&#9878;", ""]];
+    var nav = '<div class="p-sect"><span class="lbl">' + CLIENT.pod + '</span></div>' + items.map(function (i) {
+      return '<a href="#" tabindex="-1" class="' + (i[0] === active ? "on" : "") + '"><span aria-hidden="true">' + i[2] + '</span><span class="lbl">' + i[1] + "</span>" + i[3] + "</a>";
+    }).join("");
+    return '<nav class="p-nav"><div class="p-brand"><span class="logo-chip sf"><img src="' + LOGO + '" alt="SectorFlow"></span></div>' + nav +
+      '<div class="tenant"><b>' + CLIENT.name + '</b>' + (user || USER) + "</div></nav>" +
+      '<div class="p-main"><div class="gsearch' + (q ? " on" : "") + '"><span aria-hidden="true">&#9906;</span><span class="q">' + (q ? q + '<span style="color:var(--b-primary)">|</span>' : "Search SKU, supplier, PO, run id or planner") + '</span><kbd>/</kbd></div>' + body + "</div>";
+  }
+
+  /* === POD SCREENS START: one S.<key> function per beat, built with portal(), tile(), table(), pill() === */
+  var S = {};
+  var PLANNER = "M. Okafor";
+
+  /* 1. Sign in */
+  S.signin = function () {
+    return '<div class="signin"><div class="box"><img src="' + LOGO + '" alt="SectorFlow">' +
+      '<p style="margin:14px 0 0;color:var(--sf-navy);font-size:15px;font-weight:600">Harborline replenishment</p>' +
+      '<p style="margin:4px 0 0;color:var(--sf-mid);font-size:13px">Your demand, stock and purchase order agents, every proposal, and every decision.</p>' +
+      '<div class="sig"><div class="sso spot">Continue with Microsoft</div><div class="sso">Continue with Google</div></div>' +
+      '<p style="font-size:12px;color:var(--sf-mid);margin:14px 0 0">Only people your admin has added can sign in. Every action is logged.</p></div></div>';
+  };
+
+  /* 2. Overview */
+  S.home = function () {
+    return portal("home",
+      '<h2 class="p-h">Replenishment pod</h2><p class="p-sub">Reads demand, watches stock and lead times, drafts every purchase order with its reasoning, and flags anything outside your rules. Your planners approve every PO. The pod never places one.</p>' +
+      '<div class="row" style="margin-bottom:18px">' +
+      tile("Proposed POs waiting", "14", "oldest 3 h · alert at 24 h") + tile("Stockout risks flagged", "7", "all 24 h or more ahead") + tile("Stockout rate · September", "1.9%", "baseline 3.6%, set at the assessment") + tile("Planner hours returned", "62 h", "last 30 days") + '</div>' +
+      '<div class="twocol"><div><h3 class="h3">Live now</h3>' +
+      table(["Agent", "Runs", "Version", "Status"], [
+        ["Demand reader", "Nightly 1:00 am", "v6", pill("ok", "Live")],
+        ["Stock watch", "Every hour", "v9", pill("ok", "Live")],
+        ["PO drafter", "Weekdays 6:00 am, per supplier", "v12", pill("ok", "Live")],
+        ["Exception flagger", "Continuous", "v5", pill("ok", "Live")]]) +
+      '</div><div class="side"><h3 class="h3">This week</h3>' +
+      '<div class="tile"><div class="k">Quality gate</div><b style="color:var(--sf-navy)">v12 · 116 of 120 golden decisions</b><div class="d">' + pill("ok", "Passed") + ' v13 candidate in review</div></div>' +
+      '<div class="tile"><div class="k">Promotions</div><b style="color:var(--sf-navy)">Fall clean-up sale · Oct 12</b><div class="d">In tonight&#39;s forecast</div></div>' +
+      '<div class="tile"><div class="k">Needs your attention</div><b style="color:var(--sf-navy)">2 runs to review</b><div class="d">A planner changed more than a quarter of the draft</div></div></div></div>' +
+      '<p class="note">Sample data.</p>');
+  };
+
+  /* 3. The numbers it moves */
+  S.impact = function () {
+    return portal("analytics",
+      '<div class="row" style="justify-content:space-between;align-items:flex-start"><div><h2 class="p-h">The numbers it moves</h2><p class="p-sub">Last 30 days, against the 30 days before. Every number opens the runs behind it.</p></div><div class="chips">' + pill("n", "Last 30 days") + pill("n", "All sites") + pill("n", "Export PDF") + '</div></div>' +
+      '<h3 class="h3">Money the agents moved</h3><div class="row" style="margin-bottom:18px">' +
+      tile("Lost sales avoided", "41 · $7,900", "stockouts flagged, PO approved, stock in before the date") + tile("Excess stock trimmed", "31 lines · $5,600", "overstock caught before the PO was placed") +
+      tile("Planner hours returned", "62 h", "drafting time, less the review time logged") + '</div>' +
+      '<h3 class="h3">Every proposal, approved or decided by a planner with the reasoning kept</h3>' +
+      '<div class="stack"><i style="width:71%;background:var(--b-primary)">Approved as drafted · 577 · 71%</i><i style="width:29%;background:#2EA0E0">Edited or rejected · 235 · 29%</i></div>' +
+      '<p class="note" style="margin:0 0 18px">Every decision records who, what changed and why, so the next draft learns from it and the audit trail is complete.</p>' +
+      '<h3 class="h3">Your custom metrics</h3>' +
+      table(["Metric", "Counted from", "#Last 30 days", "#Change"], [
+        ["Lost sales avoided", 'Stockout risk flagged, then <span class="mono">create_po</span> approved and stock received before the projected date, times projected weekly sales', "41 · $7,900", '<span style="color:var(--ok)">+9</span>'],
+        ["Excess stock trimmed", 'Overstock flag, then the line cut or cancelled before placement, times unit cost', "31 · $5,600", '<span style="color:var(--ok)">+6</span>'],
+        ["Planner hours returned", "Proposals approved, times 35 minutes of drafting, less the review time logged", "62 h", '<span style="color:var(--ok)">+11 h</span>'],
+        ["Stockout rate", "SKU-days at zero stock at a site that sells the item, over all SKU-days", "1.9%", '<span style="color:var(--ok)">&minus;0.4 pt</span>']]) +
+      '<div style="margin-top:12px;display:flex;gap:8px;align-items:center"><button class="pbtn ghost">Add a metric</button><span class="note" style="margin:0">Any tool result or decision field can become a metric. Sample data.</span></div>');
+  };
+
+  /* 4. Agents */
+  S.agents = function () {
+    return portal("agents",
+      '<h2 class="p-h">Agents</h2><p class="p-sub">Every agent in the pod, when it runs, the version that is live, and what it produced this week.</p>' +
+      '<div class="tabs"><span class="on">All 4</span><span>Scheduled 3</span><span>Continuous 1</span></div>' +
+      table(["Agent", "Runs", "Live version", "Published", "Last 7 days", "Output"], [
+        ['<b style="color:var(--sf-navy)">Demand reader</b>', "Nightly 1:00 am", 'v6 · <span style="color:var(--sf-mid)">promo uplift from the calendar</span>', "Sep 20", "7 runs · 2,140 SKUs", "Expected sell-through by SKU and week"],
+        ['<b style="color:var(--sf-navy)">Stock watch</b>', "Every hour", 'v9 · <span style="color:var(--sf-mid)">lead-time buffer from the scorecard</span>', "Sep 24", "168 runs · 7 risks flagged", "Days of cover, stockout risk, overstock, expiry"],
+        ['<b style="color:var(--sf-navy)">PO drafter</b>', "Weekdays 6:00 am, per supplier", 'v12 · <span style="color:var(--sf-mid)">price-break check</span>', "Sep 24", "96 proposals · 71% approved as drafted", "Proposed POs, reasoning on every line"],
+        ['<b style="color:var(--sf-navy)">Exception flagger</b>', "Continuous", "v5", "Sep 2", "23 exceptions", "Anything outside the rules you set"]]) +
+      '<h3 class="h3" style="margin-top:18px">PO drafter at a glance</h3>' +
+      '<div class="sec-grid">' +
+      '<div class="tile"><div class="k">Reads</div><b style="color:var(--sf-navy)">Forecast, stock, terms, calendar</b><div class="d">all read-only · refreshed on your schedule</div></div>' +
+      '<div class="tile"><div class="k">Model</div><b style="color:var(--sf-navy)">Claude Sonnet 4.6</b><div class="d">through the pod gateway, budget set</div></div>' +
+      '<div class="tile"><div class="k">Flow</div><b style="color:var(--sf-navy)">42 steps · 9 tools</b><div class="d">0 write tools</div></div>' +
+      '<div class="tile"><div class="k">Run time</div><b style="color:var(--sf-navy)">12.6 s per supplier</b><div class="d">median · 14 suppliers each morning</div></div></div>' +
+      '<p class="note">Seven-day counts are examples.</p>');
+  };
+
+  /* 5. Flow */
+  S.flow = function () {
+    var fams = [["Gather demand", 6, "#1A6FC4"], ["Stock position", 5, "#0EA5E9"], ["Supplier terms", 7, "#16A34A"], ["Size the order", 9, "#7C3AED"], ["Time the order", 6, "#F59E0B"], ["Write reasoning", 4, "#DB2777"], ["Queue and notify", 5, "#6B7B8D"]];
+    return portal("agents",
+      '<h2 class="p-h">PO drafter v12 · flow</h2><p class="p-sub">Every step the drafter can take, drawn from the version that is live. Read-only for your team; every step is searchable.</p>' +
+      '<div class="search"><div class="in">MOQ</div><button class="pbtn">Find step</button></div>' +
+      '<div class="fam">' + fams.map(function (f, k) { return '<div style="--c:' + f[2] + '"' + (k === 3 ? ' class="sel spot"' : "") + '><b>' + f[0] + '</b>' + f[1] + ' steps</div>'; }).join("") + '</div>' +
+      '<div class="twocol" style="margin-top:16px"><div class="card" style="padding:14px"><div class="k" style="font-size:12px;color:var(--sf-mid)">Selected step</div>' +
+      '<div style="font-weight:600;color:var(--sf-navy);font-size:15px;margin-bottom:6px">Apply MOQ and pack size</div>' +
+      '<div class="say">Round the quantity up to the supplier&#39;s MOQ, then to the pack size. If a price break is within 20 percent of the rounded quantity and the extra weeks of cover stay under the overstock limit, take the break and say so in the reasoning.</div>' +
+      '<dl class="kv" style="margin-top:10px"><dt>Tool</dt><dd class="mono">get_supplier_terms · 8 s limit</dd><dt>Rounded</dt><dd>&rarr; Time the order</dd><dt>Over the overstock limit</dt><dd>&rarr; Exception: overstock</dd><dt>No terms on record</dt><dd>&rarr; Exception: new SKU, no terms</dd></dl></div>' +
+      '<div class="side"><h3 class="h3">Rules the pod enforces, not the prompt</h3>' +
+      '<div class="tile"><b style="color:var(--sf-navy)">No write tool on any step</b><div class="d">The drafter has no way to create a PO. Only a planner&#39;s approval calls your ERP.</div></div>' +
+      '<div class="tile"><b style="color:var(--sf-navy)">Terms come from your records</b><div class="d">MOQ, lead time and price breaks are read from the terms record, never remembered by the model.</div></div>' +
+      '<div class="tile"><b style="color:var(--sf-navy)">Reasoning is mandatory</b><div class="d">A line without a reason cannot enter the queue.</div></div></div></div>');
+  };
+
+  /* 6. Schedules */
+  S.schedules = function () {
+    return portal("agents",
+      '<h2 class="p-h">Runs on your calendar</h2><p class="p-sub">When each agent runs, what it read last time, and the windows when it must stand down.</p>' +
+      table(["Run", "When", "Agent", "Last run", "Next"], [
+        ['<b style="color:var(--sf-navy)">Demand read</b>', "Nightly 1:00 am ET", "Demand reader v6", "Today 1:04 am · 2 m 10 s", "Tonight"],
+        ['<b style="color:var(--sf-navy)">Stock watch</b>', "Every hour", "Stock watch v9", "9:00 am · 7 s", "10:00 am"],
+        ['<b style="color:var(--sf-navy)">Morning PO run</b>', "Weekdays 6:00 am, per supplier", "PO drafter v12", "Today 6:02 am · 14 suppliers · 2 m 41 s", "Tomorrow"],
+        ['<b style="color:var(--sf-navy)">Weekly brief</b>', "Mondays 7:00 am", "Brief", "Sep 29 · Teams and email", "Oct 6"],
+        ['<b style="color:var(--sf-navy)">On demand</b>', "Any time, from the portal", "PO drafter v12", "Sep 26 · " + PLANNER + " · Northbay Paper", "&ndash;"]]) +
+      '<div class="twocol" style="margin-top:16px"><div class="card" style="padding:16px"><div style="font-weight:600;color:var(--sf-navy);margin-bottom:10px">Freeze windows</div><div class="form">' +
+      '<span class="l">Month-end close</span><span class="v">Sep 30 to Oct 2 · watch only, no proposals</span>' +
+      '<span class="l">Mississauga cycle count</span><span class="v">Oct 7 · no delivery requested that day</span>' +
+      '<span class="l">Thanksgiving</span><span class="v">Oct 12 · deliveries move to Oct 14</span>' +
+      '<span class="l">Applies to</span><span class="chips">' + pill("b", "PO drafter") + pill("b", "Stock watch") + '</span></div>' +
+      '<div style="margin-top:14px;display:flex;gap:8px"><button class="pbtn spot">Save</button><button class="pbtn ghost">Add a window</button></div></div>' +
+      '<div class="side"><div class="toast">&#10003; Saved. Applies to tonight&#39;s run. Proposals resume Oct 3 at 6:00 am, no action needed.</div>' +
+      '<h3 class="h3">Feeds</h3>' + table(["Feed", "Refresh", "Status"], [["ERP export", "Nightly 11:30 pm", pill("ok", "Synced")], ["WMS", "Hourly", pill("ok", "Synced")], ["EDI and POS", "Daily 5:00 am", pill("ok", "Synced")], ["Supplier terms", "On change", pill("ok", "Synced")]]) +
+      '<p class="note" style="margin-top:0">Every feed is read-only. Every schedule change is in the activity log.</p></div></div>');
+  };
+
+  /* 7. Your systems */
+  S.sources = function () {
+    return portal("knowledge",
+      '<h2 class="p-h">Your systems, read-only</h2><p class="p-sub">What the pod reads, how, and how often. One write exists, and a person triggers it.</p>' +
+      table(["System", "What the pod reads", "How", "Refresh", "Status"], [
+        ['<b style="color:var(--sf-navy)">ERP</b>', "Sales and order history, product master, vendor master, open POs", "Read-only export", "Nightly 11:30 pm", pill("ok", "Synced")],
+        ['<b style="color:var(--sf-navy)">WMS</b>', "Stock on hand by site, in transit", "Read-only API", "Hourly", pill("ok", "Synced")],
+        ['<b style="color:var(--sf-navy)">EDI and POS</b>', "Customer orders, sell-through by SKU and location", "File drop", "Daily 5:00 am", pill("ok", "Synced")],
+        ['<b style="color:var(--sf-navy)">Supplier terms</b>', "Lead times, MOQs, price breaks", "Your sheet, versioned", "On change", pill("ok", "Synced")],
+        ['<b style="color:var(--sf-navy)">Promo calendar</b>', "Promotions, trade deals, launches", "This portal", "On change", pill("b", "1 upcoming")]]) +
+      '<div class="twocol" style="margin-top:16px"><div class="card" style="padding:16px"><div style="font-weight:600;color:var(--sf-navy);margin-bottom:10px">The one write: approved POs into your ERP</div><div class="form">' +
+      '<span class="l">Trigger</span><span class="v">A planner clicks Approve on a proposal</span>' +
+      '<span class="l">What is written</span><span class="v">The PO exactly as approved, line by line</span>' +
+      '<span class="l">On the record</span><span class="v">Planner name, approval id, time, the reasoning</span>' +
+      '<span class="l">Never</span><span class="v">An agent, a schedule, a retry</span></div></div>' +
+      '<div class="side"><div class="tile"><div class="k">Rows read last night</div><b style="color:var(--sf-navy)">184,200</b><div class="d">across four feeds</div></div>' +
+      '<div class="tile"><div class="k">Rows written yesterday</div><b style="color:var(--sf-navy)">3 purchase orders</b><div class="d">each approved by a planner</div></div>' +
+      '<div class="tile"><div class="k">Feed failures, 30 days</div><b style="color:var(--sf-navy)">0</b><div class="d">alert on any</div></div></div></div>' +
+      '<p class="note">System names are placeholders; the pod connects to yours. Sample data.</p>');
+  };
+
+  /* 8. Reorder rules */
+  S.rules = function () {
+    return portal("rules",
+      '<h2 class="p-h">Reorder rules</h2><p class="p-sub">The rules every agent works inside. They change only when you change them. No release, no ticket to us.</p>' +
+      table(["Rule", "Setting", "Applies to"], [
+        ["Service level target", "A 98% · B 95% · C 90%", "By SKU class"],
+        ["Safety stock", "Lead-time demand &times; 1.25", "All SKUs"],
+        ["Lead-time buffer", "Scorecard average; +2 days if late twice in a quarter", "All suppliers"],
+        ["Overstock limit", "16 weeks of cover", "All; Safety class 20"],
+        ["Stockout risk flag", "Cover below lead time + 3 days", "All SKUs"],
+        ["Supplier late", "5 days past requested delivery", "All open POs"],
+        ["New SKU", "No history: exception, never drafted", "All sites"]]) +
+      '<div class="twocol" style="margin-top:16px"><div class="card" style="padding:16px"><div style="font-weight:600;color:var(--sf-navy);margin-bottom:10px">Edit rule · Overstock limit</div><div class="form">' +
+      '<span class="l">Current</span><span class="v">16 weeks of cover</span>' +
+      '<span class="l">New</span><span class="v">14 weeks of cover</span>' +
+      '<span class="l">Reason</span><span class="v">Q4 cash target</span>' +
+      '<span class="l">Applies</span><span class="v">Next run, tonight at 1:00 am</span>' +
+      '<span class="l">Changed by</span><span class="v">' + PLANNER + ' · Supply Planning lead</span></div>' +
+      '<div style="margin-top:14px;display:flex;gap:8px"><button class="pbtn spot">Save</button><button class="pbtn ghost">Preview effect</button></div></div>' +
+      '<div class="side"><div class="toast">&#10003; Saved. 11 open proposals re-checked: 2 now flagged as overstock.</div>' +
+      '<h3 class="h3">Rule history</h3>' + table(["When", "Change", "Who"], [["Sep 12", "Overstock limit 18 &rarr; 16 weeks", PLANNER], ["Aug 30", "Service level C 88% &rarr; 90%", PLANNER], ["Aug 4", "Supplier late 7 &rarr; 5 days", "Purchasing"]]) +
+      '<p class="note" style="margin-top:0">Agents cannot change a rule. Every change is in the activity log with who and why.</p></div></div>');
+  };
+
+  /* 9. Live run */
+  var RUN = [
+    ["sys", "Run", "PO drafter v12 · Ridgeway Packaging · Tue 6:02 am ET · scheduled morning run", ""],
+    ["tool", "Tool", "get_demand_forecast &rarr; 38 SKUs · 12 weeks · from last night&#39;s Demand reader run", "1.2 s"],
+    ["tool", "Tool", "get_stock_position &rarr; on hand, on order, in transit · 3 sites", "0.8 s"],
+    ["tool", "Tool", "get_supplier_terms &rarr; Ridgeway Packaging · lead time 14 d · MOQ and price breaks per SKU", "0.3 s"],
+    ["agent", "Drafter", "RP-4410 stretch film: 9 days of cover at Mississauga, lead time 14 days. Sell-through 210 a week, rising 12 percent into the Oct 12 promo. Order now or it runs out around Oct 9.", ""],
+    ["agent", "Drafter", "Quantity 1,800: covers 8 weeks at promo pace, meets the 1,200 MOQ, and reaches the $4.12 price break at 1,800. Saves $486 against 1,500.", ""],
+    ["tool", "Tool", "check_open_pos &rarr; none open for RP-4410", "0.4 s"],
+    ["agent", "Drafter", "RP-2210 boxes: 31 days of cover, no promo. Skip. RP-0980 tape: 12 days of cover, order 2 pallets to the pack size.", ""],
+    ["tool", "Tool", "promo_calendar &rarr; Fall clean-up sale · Oct 12 to 26 · 46 SKUs · +25% expected", "0.2 s"],
+    ["agent", "Drafter", "Requested delivery Oct 14: inside the lead time, before the promo peak, and after the Oct 7 cycle count at Mississauga.", ""],
+    ["tool", "Tool", "create_proposal &rarr; PO-24817 · 6 lines · $18,420 · queued for review", "0.4 s"],
+    ["sys", "Pod", "Handed to the planner queue with reasoning on every line. No purchase order placed.", ""],
+    ["xfer", "Queue", "Proposed POs · Ridgeway Packaging · waiting for a planner · alert if untouched for 24 h", ""]
+  ];
+  S.run = function () {
+    return portal("runs",
+      '<div class="row" style="justify-content:space-between;align-items:flex-start"><div><h2 class="p-h">Live run · PO drafter v12</h2><p class="p-sub">What the agent reads, what it decides and why, as it happens. It ends in your queue, not in your ERP.</p></div>' + pill("ok", "&#9679; Running") + '</div>' +
+      '<div class="tx" id="anim">' + RUN.map(function (c) {
+        return '<div class="ln pending ' + c[0] + '"><span class="sp">' + c[1] + '</span><span>' + c[2] + '</span><span class="ms">' + c[3] + '</span></div>';
+      }).join("") + '</div>');
+  };
+
+  /* 10. Search */
+  S.search = function () {
+    return portal("runs",
+      '<div class="drop">' +
+      '<div class="grp">SKU</div>' +
+      '<div class="it"><span>' + pill("b", "SKU") + '</span><span><b><mark>RP-4410</mark> Stretch film 18 in, 80 ga</b> · Ridgeway Packaging · Mississauga, Calgary · 9 days of cover</span><span style="color:var(--sf-mid);font-size:12px">14 runs</span></div>' +
+      '<div class="grp">History</div>' +
+      '<div class="it on"><span class="mono">r_8c21</span><span><b>Run · today 6:02 am</b> · PO-24817 proposed, 6 lines, 1,800 units of <mark>RP-4410</mark></span><span style="color:var(--b-primary);font-weight:600;font-size:12.5px">Open &rarr;</span></div>' +
+      '<div class="it"><span class="mono">ex_311</span><span><b>Exception · Sep 26</b> · stockout risk flagged at Calgary, 16 days ahead</span><span style="color:var(--sf-mid);font-size:12px">Open</span></div>' +
+      '<div class="it"><span class="mono">r_7b04</span><span><b>Run · Sep 19</b> · PO-24690 approved as drafted by ' + PLANNER + '</span><span style="color:var(--sf-mid);font-size:12px">Open</span></div>' +
+      '<div class="it"><span class="mono">0048102</span><span><b>PO · Sep 5</b> · received Sep 21, two days late, supplier flagged</span><span style="color:var(--sf-mid);font-size:12px">Open</span></div>' +
+      '</div>' +
+      '<h3 class="h3">Search finds</h3>' +
+      table(["Type", "Example", "Goes to"], [
+        ["SKU or description", '<span class="mono">RP-4410</span> or <span class="mono">stretch film</span>', "The item, its cover by site, and every run that touched it"],
+        ["Supplier", '<span class="mono">Ridgeway</span>', "Terms, open POs, lateness, every proposal"],
+        ["PO or proposal number", '<span class="mono">PO-24817</span>, <span class="mono">0048213</span>', "Straight to that record"],
+        ["Run, exception or planner", '<span class="mono">r_8c21</span>, <span class="mono">Okafor</span>', "The run, or everything that person decided"]]) +
+      '<p class="note">Who can see cost and price data is a role setting. Sample data.</p>', null, "RP-4410");
+  };
+
+  /* 11. Proposal detail */
+  S.detail = function () {
+    return portal("runs",
+      '<h2 class="p-h">Proposal PO-24817 · Ridgeway Packaging · Tue 6:02 am</h2><p class="p-sub">Every line, the reasoning behind it, what the agent read, and what the planner decided.</p>' +
+      '<h3 class="h3">Path through the flow</h3><div class="chips" style="margin-bottom:14px">' +
+      ["Gather demand", "Stock position", "Supplier terms", "Size the order", "Time the order", "Write reasoning", "Queue", "Planner decision"].map(function (x, k) { return pill(k === 3 ? "b" : k === 7 ? "ok" : "n", x); }).join(" &rarr; ") + '</div>' +
+      table(["Line", "SKU", "#Cover", "#Drafted", "Reasoning", "Planner"], [
+        ["1", '<span class="mono">RP-4410</span> Stretch film', "9 d", "1,800", "Promo Oct 12, lead time 14 d, price break at 1,800", pill("ok", "Approved")],
+        ["2", '<span class="mono">RP-0980</span> Packing tape', "12 d", "960", "2 pallets to pack size; steady demand", pill("ok", "Approved")],
+        ["3", '<span class="mono">RP-3120</span> Bubble wrap', "15 d", "600", "Below safety stock after the promo uplift", pill("warn", "Edited: 480")],
+        ["4", '<span class="mono">RP-1015</span> Poly mailers', "11 d", "2,400", "MOQ 2,400; 7 weeks of cover, under the limit", pill("ok", "Approved")],
+        ["5", '<span class="mono">RP-5502</span> Edge protectors', "10 d", "400", "Pack size 400; Calgary transfer not enough", pill("ok", "Approved")],
+        ["6", '<span class="mono">RP-2231</span> Boxes 16&times;12&times;8', "13 d", "1,200", "MOQ; promo SKU", pill("ok", "Approved")]]) +
+      '<div class="twocol" style="margin-top:14px"><div><h3 class="h3">What the agent read</h3>' +
+      table(["Tool", "Result", "#Time"], [
+        ['<span class="mono">get_demand_forecast</span>', "38 SKUs, 12 weeks", "1.2 s"],
+        ['<span class="mono">get_stock_position</span>', "3 sites, on order included", "0.8 s"],
+        ['<span class="mono">get_supplier_terms</span>', pill("ok", "terms record · Sep 29"), "0.3 s"],
+        ['<span class="mono">promo_calendar</span>', "Fall clean-up sale, +25%", "0.2 s"],
+        ['<span class="mono">create_proposal</span>', pill("ok", "PO-24817 queued"), "0.4 s"]]) +
+      '</div><div class="side"><div class="card" style="padding:14px"><h3 class="h3">Decision</h3>' +
+      '<p style="margin:0 0 10px;font-size:13px;color:var(--sf-navy)">' + PLANNER + ' approved five lines as drafted and cut line 3 from 600 to 480 because a cycle count at Mississauga is pending. PO 0048213 was created in the ERP from the approval, with the reasoning attached.</p>' +
+      '<dl class="kv"><dt>Outcome</dt><dd>' + pill("ok", "Successful") + ' PO created</dd><dt>Type</dt><dd>Scheduled reorder</dd><dt>Review time</dt><dd>4 min</dd><dt>Edit size</dt><dd>1 of 6 lines · 20% on that line</dd><dt>Version</dt><dd>PO drafter v12</dd></dl></div>' +
+      '<div class="card" style="padding:14px"><h3 class="h3">Speed</h3><dl class="kv"><dt>Run time</dt><dd>12.6 s</dd><dt>In queue</dt><dd>2 h 14 min</dd><dt>Undo</dt><dd>' + pill("n", "Available until received") + '</dd></dl></div></div></div>' +
+      '<p class="note">Example proposal. Prices and quantities are illustrative.</p>');
+  };
+
+  /* 12. Trace */
+  S.trace = function () {
+    var T = 12600;
+    var spans = [
+      ["Demand forecast read: 38 SKUs, 12 weeks", "stt", 0, 1180, "read"],
+      ["Stock position from WMS and open POs", "tool", 1180, 2020, "tool"],
+      ["Supplier terms: MOQ, lead time, price breaks", "kb", 2020, 2310, "terms"],
+      ["Model sizes and times each line", "llm", 2310, 8740, "model"],
+      ["Model writes the reasoning per line", "llm", 8740, 11860, "model"],
+      ["Promo calendar check: Oct 12 uplift", "kb", 11860, 12140, "terms"],
+      ["Proposal PO-24817 written to the queue", "tts", 12140, 12560, "write"]
+    ];
+    var rows = '<div class="tr-row hd"><span>Step · Ridgeway Packaging run</span><span>0 to 12.6 s</span><span class="num">Time</span></div>' + spans.map(function (s, k) {
+      return '<div class="tr-row' + (k === 3 ? " hl" : "") + '"><span class="nm"><span class="kind" style="background:var(--c)" data-k="' + s[1] + '">' + s[4] + '</span>' + s[0] + '</span><span class="bar2"><i class="k-' + s[1] + '" style="left:' + (s[2] / T * 100) + '%;width:' + Math.max(1.2, (s[3] - s[2]) / T * 100) + '%"></i></span><span class="num">' + (s[3] - s[2]).toLocaleString() + ' ms</span></div>';
+    }).join("");
+    var sup = [["Ridgeway Packaging", "6 lines", "12.6 s", "5"], ["Maple Crest Chemical", "3 lines", "9.1 s", "5"], ["Northbay Paper", "8 lines", "14.8 s", "6"], ["Kestrel Safety", "nothing to order", "4.2 s", "3"], ["10 more suppliers", "21 lines", "1 m 58 s", "48"]];
+    return portal("runs",
+      '<h2 class="p-h">Trace · run r_8c21</h2><p class="p-sub">Every step broken into data reads, terms lookups, model time and the write to your queue. When a run looks wrong, this shows exactly what it read and when.</p>' +
+      '<div class="tr">' + rows + '</div>' +
+      '<div class="legend"><span style="--c:#0EA5E9">Data read</span><span style="--c:#1A6FC4">Model</span><span style="--c:#7C3AED">Your systems</span><span style="--c:#F59E0B">Terms and calendar</span><span style="--c:#16A34A">Write to queue</span></div>' +
+      '<div class="twocol" style="margin-top:16px"><div><h3 class="h3">This morning, per supplier</h3>' +
+      table(["Supplier", "Result", "#Run time", "#Reads"], sup) +
+      '</div><div class="side"><div class="tile"><div class="k">Where the time goes</div><b style="color:var(--sf-navy)">76% model, 24% reads</b><div class="d">the v13 candidate targets the model time</div></div>' +
+      '<div class="tile"><div class="k">One trace per run</div><b style="color:var(--sf-navy)">Agent, model, terms and your systems</b><div class="d">same id at every step, kept with the proposal</div></div></div></div>');
+  };
+  S.trace.post = function () {
+    var c = { stt: "#0EA5E9", llm: "#1A6FC4", tts: "#16A34A", tool: "#7C3AED", kb: "#F59E0B" };
+    Array.prototype.forEach.call(screen.querySelectorAll(".kind"), function (e) { e.style.background = c[e.getAttribute("data-k")]; });
+  };
+
+  /* 13. Decisions and exceptions */
+  S.decisions = function () {
+    var d = [["Approved as drafted", 577], ["Approved with edits", 148], ["Rejected", 61], ["Expired, unreviewed", 26]];
+    var x = [["Stockout risk inside lead time", 84], ["Supplier late", 39], ["Overstock: cut or cancel", 31], ["New SKU, no history", 22], ["Price change over 5%", 14], ["Promo with no forecast", 9]];
+    return portal("queue",
+      '<h2 class="p-h">Every proposal gets a decision</h2><p class="p-sub">Where proposals and exceptions went, last 90 days. Every one records who decided, what changed and why.</p>' +
+      '<div class="row" style="margin-bottom:16px">' + tile("Proposals", "812", "90 days · 14 suppliers") + tile("Decided within 24 h", "94%", "26 expired and were re-drafted") + tile("Reason recorded", "100%", "every edit and rejection has one") + '</div>' +
+      '<h3 class="h3">Proposals</h3><div class="hb">' + d.map(function (r) { return '<div class="hb-row"><span class="lbl">' + r[0] + '</span><span class="track"><i data-w="' + (r[1] / 577 * 100) + '"></i></span><span class="num">' + r[1].toLocaleString() + '</span><span class="num x">' + (r[1] / 812 * 100).toFixed(0) + '%</span></div>'; }).join("") + '</div>' +
+      '<h3 class="h3" style="margin-top:16px">Exceptions, by the rule that fired</h3><div class="hb">' + x.map(function (r) { return '<div class="hb-row"><span class="lbl">' + r[0] + '</span><span class="track"><i class="alt" data-w="' + (r[1] / 84 * 100) + '"></i></span><span class="num">' + r[1] + '</span><span class="num x">' + (r[1] / 199 * 100).toFixed(0) + '%</span></div>'; }).join("") + '</div>' +
+      '<div class="flagbox">40 of the 61 rejections were for a supplier the planner already knew was changing. A supplier note field is the next easy win, and it is a content change, not a release.</div>' +
+      '<p class="note">Sample data.</p>');
+  };
+
+  /* 14. Knowledge */
+  S.knowledge = function () {
+    return portal("knowledge",
+      '<h2 class="p-h">Knowledge</h2><p class="p-sub">What the agents know beyond the feeds: supplier terms, your policies, the calendar. Edit or upload; every save applies on the next run.</p>' +
+      '<div class="row" style="margin-bottom:16px">' + tile("Sources", "5", "used by all 4 agents") + tile("Suppliers with terms", "140", "of 140 active") + tile("Sync", "All synced", "") + tile("Last update", "Sep 29", "Purchasing") + '</div>' +
+      table(["Source", "What it holds", "Records", "Updated", "Status"], [
+        ["Supplier terms", "Lead times, MOQs, pack sizes, price breaks", "140 suppliers · 2,140 SKUs", "Sep 29 · Purchasing", pill("ok", "Synced")],
+        ["Reorder policy", "Service levels, safety stock, overstock limit", "1 document · v3", "Sep 12 · Supply Planning", pill("ok", "Synced")],
+        ["Promo and seasonality calendar", "Promotions, trade deals, launches, seasons", "14 entries", "Sep 28 · Sales and Marketing", pill("ok", "Synced")],
+        ["Product master", "SKU class, pack size, shelf life, substitutes", "2,140 SKUs", "Nightly · ERP", pill("ok", "Synced")],
+        ["Site calendars", "Cycle counts, closures, receiving hours", "3 sites", "Sep 20 · Warehouse", pill("ok", "Synced")]]) +
+      '<h3 class="h3" style="margin-top:16px">Documents and when they were captured</h3>' +
+      table(["Document", "Captured", "Used for"], [
+        ['<span class="mono">Ridgeway_2026_price_list.pdf</span>', "Jan 8", pill("warn", "Excluded") + ' terms come only from the terms record'],
+        ['<span class="mono">Reorder_policy_v3.docx</span>', "Sep 12", "Service levels and limits"],
+        ['<span class="mono">Supplier_scorecard_Q3.xlsx</span>', "Sep 24", "Actual lead times, lateness buffer"]]) +
+      '<p class="note">Source names and counts are examples; the records are yours.</p>');
+  };
+
+  /* 15. Test a question */
+  S.ask = function () {
+    return portal("knowledge",
+      '<h2 class="p-h">Test a question</h2><p class="p-sub">Ask what a planner would ask. See exactly what the agent would be given, and where it came from.</p>' +
+      '<div class="search"><div class="in">what is the lead time for Ridgeway stretch film</div><button class="pbtn">Test</button></div>' +
+      '<div class="res top"><div><span class="sku">Supplier terms</span> &nbsp;<span class="desc">Ridgeway Packaging · RP-4410 · lead time 14 days · MOQ 1,200 · breaks at 1,200, 1,800, 3,600</span></div><div class="score">authority</div><div class="meta">Updated Sep 29 by Purchasing. ' + pill("b", "Always wins for terms questions") + '</div></div>' +
+      '<div class="res"><div><span class="sku">Supplier scorecard Q3</span> &nbsp;<span class="desc">Ridgeway actual lead time 15.6 days · 2 of 9 POs late</span></div><div class="score">0.74</div><div class="meta"><span class="cite">Supplier_scorecard_Q3.xlsx · captured Sep 24 · row 31</span> &nbsp;' + pill("ok", "Adds a 2-day buffer") + '</div></div>' +
+      '<div class="res" style="opacity:.6"><div><span class="sku">Documents</span> &nbsp;<span class="desc">Ridgeway 2026 price list: lead time 10 days</span></div><div class="score">0.69</div><div class="meta"><span class="cite">Ridgeway_2026_price_list.pdf · captured Jan 8</span> &nbsp;' + pill("warn", "Not given to the agent") + ' stale source for a topic with an authority</div></div>' +
+      '<div class="flagbox">An old PDF says 10 days. The terms record says 14, and the scorecard says 15.6 in practice. The drafter uses the record plus the buffer, and it never sees the PDF.</div>');
+  };
+
+  /* 16. Promotions */
+  S.promos = function () {
+    return portal("promos",
+      '<h2 class="p-h">Promotions and seasonality</h2><p class="p-sub">What is coming that changes demand, with dates. The agents plan for it. No release, no ticket to us.</p>' +
+      '<div class="tabs"><span>Active 0</span><span class="on">Upcoming 1</span><span>Seasons 4</span><span>Past 9</span></div>' +
+      '<div class="twocol"><div class="card" style="padding:16px"><div class="form">' +
+      '<span class="l">Name</span><span class="v">Fall facility clean-up sale</span>' +
+      '<span class="l">Runs</span><span class="v">Oct 12 to Oct 26, 2026</span>' +
+      '<span class="l">SKUs</span><span class="v">46 · Packaging and Janitorial · list attached</span>' +
+      '<span class="l">Expected uplift</span><span class="v">+25% · from last year&#39;s sale, +28% actual</span>' +
+      '<span class="l">Sites</span><span class="chips">' + pill("b", "Mississauga") + pill("b", "Calgary") + pill("b", "Moncton") + '</span>' +
+      '<span class="l">Owner</span><span class="v">Sales and Marketing</span></div>' +
+      '<div style="margin-top:14px;display:flex;gap:8px"><button class="pbtn spot">Save</button><button class="pbtn ghost">Preview forecast</button></div></div>' +
+      '<div class="side"><h3 class="h3">What the agents do with it</h3><div class="say">Demand reader raises the 46 SKUs from Oct 5 so stock lands before the sale. Stock watch flags any of them whose cover will not reach Oct 26. The drafter orders to promo pace plus one week. RP-4410: 210 a week becomes 262.</div>' +
+      '<div class="toast">&#10003; Saved. In tonight&#39;s demand run. Uplift ends by itself Oct 26.</div>' +
+      '<h3 class="h3">Last promotion</h3>' + table(["Promotion", "#SKUs", "#Stockouts"], [["Back-to-school paper · Aug 18 to Sep 5", "88", "1 · was 9 the year before"]]) + '</div></div>' +
+      '<p class="note">Promotion and counts are examples.</p>');
+  };
+
+  /* 17. Honest scoring */
+  S.review = function () {
+    return portal("quality",
+      '<h2 class="p-h">Runs to review</h2><p class="p-sub">A proposal only counts as successful if a planner approved it without a large edit and the stock arrived before the projected stockout date. Not because a PO was drafted.</p>' +
+      table(["Run", "What happened", "Old verdict", "Pod verdict"], [
+        ["r_5a10 · Sep 11", "Drafted 2,400 units of MC-0930 for a promo Sales had cancelled the day before; planner cut it to 800", '<span class="pill ok">PO proposed</span>', pill("err", "Failed") + " edit over 25%, calendar was stale"],
+        ["r_5c42 · Sep 16", "Stockout risk on KS-7710 flagged 6 days out; the supplier&#39;s lead time is 21 days", '<span class="pill ok">alert sent</span>', pill("err", "Failed") + " flagged after the last safe order date"],
+        ["r_8c21 · Sep 29", "PO-24817 approved with one small edit; PO 0048213 created; delivery due Oct 14", '<span class="pill ok">PO proposed</span>', pill("ok", "Successful")]], "cmp2") +
+      '<div class="twocol" style="margin-top:16px"><div><h3 class="h3">How the pod decides</h3>' +
+      table(["Signal", "Used"], [["Planner decision and the size of any edit", "&#10003;"], ["PO created in your ERP from the approval", "&#10003;"], ["Stock received before the projected stockout date", "&#10003;"], ["Confident wording in the reasoning", "not counted"]]) +
+      '</div><div class="side"><div class="tile"><div class="k">In a spreadsheet</div><b style="color:var(--sf-navy)">A proposed order counts as done</b><div class="d">the stockout still shows up at receiving</div></div>' +
+      '<div class="tile"><div class="k">In the pod</div><b style="color:var(--sf-navy)">Each miss can become a golden case</b><div class="d">' + pill("b", "Add to golden decisions") + '</div></div></div></div>');
+  };
+
+  /* 18. Golden decisions */
+  var CATS = [["Never place a PO: zero write calls", 12, 12, 12, 12, true], ["MOQ and pack rounding", 14, 14, 11, 14, true], ["Lead time respected", 16, 16, 16, 16, true], ["Promo uplift applied", 10, 10, 10, 10, true], ["Freeze windows honoured", 8, 8, 8, 8, true], ["Reasoning on every line", 10, 10, 10, 10, true],
+    ["Quantity within 10% of the planner&#39;s final", 22, 20, 17, 21, false], ["Order timing", 12, 11, 10, 12, false], ["Price break taken when cheaper", 8, 8, 6, 8, false], ["New SKU with no history", 8, 7, 6, 7, false]];
+  S.golden = function () {
+    return portal("quality",
+      '<h2 class="p-h">Golden decisions</h2><p class="p-sub">120 reorder decisions from your own history, 18 months of them, replayed against every new version. Customer names removed.</p>' +
+      '<div class="row" style="margin-bottom:16px">' + tile("Live version v12", "96.7%", "116 of 120") + tile("Must-pass rules", "70 of 70", "any failure blocks a release") + tile("Runs replayed", "18 months", "every logged run must still produce a proposal") + tile("Runs on", "every change", "prompt, model, tool or rule logic") + '</div>' +
+      table(["Category", "#Cases", "#v12 passed", "Blocks release"], CATS.map(function (c) { return [c[0], c[1], c[2] + (c[2] < c[1] ? ' <span style="color:var(--warn)">(' + (c[1] - c[2]) + ')</span>' : ""), c[5] ? pill("err", "must pass") : pill("n", "counts to 90%")]; })) +
+      '<p class="note">The four v12 misses are known: two new-SKU cases and two quantity cases, with fixes in the v13 candidate.</p>');
+  };
+
+  /* 19. Gate blocks */
+  function gateRows(which) {
+    return CATS.map(function (c) {
+      var v = which === 1 ? c[3] : c[4];
+      var bad = v < c[2];
+      return [c[0], c[1], c[2], '<b style="color:' + (bad ? "var(--err)" : v > c[2] ? "var(--ok)" : "var(--sf-navy)") + '">' + v + '</b>' + (bad && c[5] ? " " + pill("err", "hard fail") : bad ? " " + pill("warn", "regressed") : "")];
+    });
+  }
+  S.gate1 = function () {
+    return portal("releases",
+      '<h2 class="p-h">Release v13 · cheaper model for line sizing</h2><p class="p-sub">Candidate from SectorFlow. Goal: cut run time and cost. It has to pass your golden decisions before it can draft a single line.</p>' +
+      '<div class="gate blocked"><div class="big">Blocked</div><div><b>106 of 120 (88.3%)</b> against v12&#39;s 116. Three must-pass cases failed, all MOQ rounding. Ten cases that pass today now fail.<br><span style="font-size:12.5px">This version cannot go live. No one can override it.</span></div></div>' +
+      '<div class="gatebar" style="margin-top:14px"><span>v12 live</span><span class="track"><i data-w="96.7"></i><b style="left:90%"></b></span><span class="num">96.7%</span></div>' +
+      '<div class="gatebar"><span>v13 rc1</span><span class="track"><i class="bad" data-w="88.3"></i><b style="left:90%"></b></span><span class="num">88.3%</span></div>' +
+      '<div class="twocol" style="margin-top:12px"><div>' + table(["Category", "#Cases", "#v12", "#v13 rc1"], gateRows(1)) + '</div>' +
+      '<div class="side"><h3 class="h3">MOQ-04 · quantity below the minimum</h3><div class="tx">' +
+      '<div class="ln sys"><span class="sp">Case</span><span>RP-4410 · 9 days of cover · terms: MOQ 1,200</span><span></span></div>' +
+      '<div class="ln tool"><span class="sp">Tool</span><span>get_supplier_terms &rarr; MOQ 1,200 (read, not applied)</span><span></span></div>' +
+      '<div class="ln agent"><span class="sp">Drafter</span><span>Order 900 units, covers four weeks.</span><span></span></div>' +
+      '<div class="ln sys"><span class="sp">Check</span><span style="color:var(--err)">Quantity below MOQ &rarr; fail</span><span></span></div></div></div></div>');
+  };
+
+  /* 20. Gate passes */
+  S.gate2 = function () {
+    return portal("releases",
+      '<h2 class="p-h">Release v13 rc2 · MOQ check moved into the flow</h2><p class="p-sub">Same 120 decisions. Same 18 months of runs. Faster, cheaper, and better than what is live.</p>' +
+      '<div class="gate passed"><div class="big">Passed</div><div><b>118 of 120 (98.3%)</b> · all 70 must-pass cases · 0 regressions · every replayed run still produces a proposal<br><span style="font-size:12.5px">Run time 5.1 s per supplier, down from 12.6 s.</span></div></div>' +
+      '<div class="gatebar" style="margin-top:14px"><span>v12 live</span><span class="track"><i data-w="96.7"></i><b style="left:90%"></b></span><span class="num">96.7%</span></div>' +
+      '<div class="gatebar"><span>v13 rc2</span><span class="track"><i data-w="98.3"></i><b style="left:90%"></b></span><span class="num">98.3%</span></div>' +
+      '<h3 class="h3" style="margin-top:16px">Versions</h3>' +
+      table(["Version", "Notes", "Gate", "State"], [
+        ["PO drafter v13 + Stock watch v10", "Cheaper model for line sizing; MOQ and pack rounding as a flow step, not a prompt line", pill("ok", "98.3%"), '<button class="pbtn" disabled title="Published by SectorFlow">Make live</button>'],
+        ["PO drafter v12 + Stock watch v9", "Price-break check; lead-time buffer from the scorecard", pill("ok", "96.7%"), pill("ok", "Live")],
+        ["PO drafter v11 + Stock watch v8", "Freeze windows", pill("n", "95.0%"), pill("n", "Kept for one-step rollback")]]) +
+      '<p class="note">Your team reads every release note and gate result. SectorFlow makes a version live after you agree; rollback is one step and your schedules do not change.</p>');
+  };
+
+  /* 21. The number */
+  S.analytics = function () {
+    var cat = [["Packaging", 1.4, 3.1], ["Janitorial chemicals", 2.3, 4.2], ["Paper and tissue", 1.1, 2.6], ["Safety", 2.8, 4.9], ["Equipment parts", 3.1, 5.4]];
+    return portal("analytics",
+      '<div class="row" style="justify-content:space-between;align-items:flex-start"><div><h2 class="p-h">The number: stockout rate</h2><p class="p-sub">Share of SKU-days where a sellable item had zero stock at a site that sells it. Reported monthly, by site, against the baseline set in writing at the assessment.</p></div><div class="chips">' + pill("n", "September") + pill("n", "All sites") + pill("n", "Export PDF") + '</div></div>' +
+      '<div class="row" style="margin-bottom:16px">' + tile("Stockout rate", "1.9%", "baseline 3.6%") + tile("Weeks of inventory", "7.4", "baseline 8.7") + tile("Stock past sell-by", "$12,400", "baseline $31,900") + tile("Commitments held", "100%", "every PO reviewed by a person · every risk flagged 24 h+ ahead") + '</div>' +
+      '<div class="twocol"><div><h3 class="h3">By site, September</h3>' +
+      table(["Site", "#Baseline", "#September", "#SKUs stocked out"], [["Mississauga", "3.4%", "1.6%", "34"], ["Calgary", "3.9%", "2.3%", "29"], ["Moncton", "3.6%", "1.8%", "19"]]) +
+      '</div><div class="side"><div class="tile"><div class="k">Monthly report</div><b style="color:var(--sf-navy)">Sent Oct 1, by site</b><div class="d">to the planning lead and finance</div></div>' +
+      '<div class="tile"><div class="k">If the number does not move</div><b style="color:var(--sf-navy)">Written remediation plan in 10 business days</b><div class="d">after two months with no improvement over baseline</div></div></div></div>' +
+      '<h3 class="h3" style="margin-top:16px">By category</h3><div class="hb">' + cat.map(function (x) { return '<div class="hb-row"><span class="lbl">' + x[0] + '</span><span class="track"><i data-w="' + (x[1] / 5.4 * 100) + '"></i></span><span class="num">' + x[1].toFixed(1) + '%</span><span class="num x">was ' + x[2].toFixed(1) + '%</span></div>'; }).join("") + '</div>' +
+      '<p class="note">Sample data. Your assessment sets the baseline and replaces every number here.</p>');
+  };
+
+  /* 22. What the agents completed */
+  S.completed = function () {
+    var f = [["SKUs watched", 2140], ["Flagged at risk, 90 days", 312], ["Proposals drafted for them", 268], ["Approved by a planner", 214], ["POs created in the ERP", 214], ["Received before the stockout date", 203]];
+    return portal("analytics",
+      '<h2 class="p-h">What the agents completed</h2><p class="p-sub">Last 90 days. Counted from tool results and planner decisions, not from summaries.</p>' +
+      '<div class="twocol"><div><h3 class="h3">From risk to stock on the shelf</h3><div class="funnel">' + f.map(function (x) { return '<div class="fr"><span>' + x[0] + '</span><span class="track"><i data-w="' + Math.max(1, x[1] / 2140 * 100) + '"></i></span><span class="num">' + x[1].toLocaleString() + '</span></div>'; }).join("") + '</div>' +
+      '<p class="note">9 stockouts still happened: 6 supplier late, 3 new SKUs with no history. 2 more were flagged but the proposal expired unreviewed.</p>' +
+      '<h3 class="h3" style="margin-top:14px">Completed with no drafting by a person</h3><div class="row">' + tile("Proposals drafted", "812", "") + tile("Risks flagged 24 h+ ahead", "312", "") + tile("Overstock lines cut", "31", "") + tile("Supplier-late alerts", "39", "") + '</div></div>' +
+      '<div class="side"><h3 class="h3">Key findings</h3>' +
+      '<div class="finding"><span>Supplier lateness is now the main cause of stockouts: 6 of 9 in 90 days, 4 from one supplier.</span><a href="#">6 runs &rarr;</a></div>' +
+      '<div class="finding"><span>Calgary carries 2.1 more weeks of cover than Mississauga on the same SKUs. A transfer rule would free about $18K of stock.</span><a href="#">61 SKUs &rarr;</a></div>' +
+      '<div class="finding"><span>Promo SKUs stocked out once in the back-to-school sale, against nine the year before.</span><a href="#">88 SKUs &rarr;</a></div>' +
+      '<div class="finding"><span>Planners approve 71% as drafted in under four minutes. Editing time concentrates on new SKUs.</span><a href="#">812 proposals &rarr;</a></div>' +
+      '<p class="note" style="margin-top:0">Findings are written from the metrics and reviewed by SectorFlow before you see them.</p></div></div>');
+  };
+
+  /* 23. Weekly brief and questions */
+  S.brief = function () {
+    var th = [
+      ["caller", "Planner", "which suppliers are late this week?", "7:12"],
+      ["tool", "Tool", "get_open_pos &rarr; 3 past requested delivery", "0.6 s"],
+      ["agent", "Pod", "Three: Kestrel Safety PO 0048170, 6 days late, KS-7710 at 4 days of cover at Calgary. Northbay Paper PO 0048155, 2 days late, no risk. Maple Crest PO 0048161, 1 day late, no risk.", "7:12"],
+      ["caller", "Planner", "flag the Kestrel one and draft a stopgap from Apex Safety", "7:13"],
+      ["tool", "Tool", "create_exception &rarr; ex_318 · run_on_demand &rarr; PO drafter · Apex Safety", "9.4 s"],
+      ["agent", "Pod", "Done. ex_318 is in the exception queue. PO-24821 for Apex Safety is proposed: 400 units of KS-7710, delivery Oct 3. It is waiting for your approval.", "7:13"]
+    ];
+    return portal("runs",
+      '<div class="row" style="justify-content:space-between;align-items:flex-start"><div><h2 class="p-h">The weekly stock brief</h2><p class="p-sub">Posted to your channel every Monday. Ask it anything in the thread; it answers from the same data and the same rules.</p></div><div class="chips">' + pill("b", "Teams") + pill("n", "Email") + pill("n", "Slack") + '</div></div>' +
+      '<div class="row" style="margin-bottom:14px">' + tile("Briefs sent", "13", "every Monday since ramp") + tile("Questions asked", "41", "in threads") + tile("Answered from pod data", "100%", "no guesses") + tile("Actions taken", "9", "each one queued, none placed") + '</div>' +
+      '<div class="mail"><div class="hd"><b>#supply-planning</b> · Mon Sep 29, 7:00 am · from Replenishment pod</div><pre>Stock brief, week of Sep 29\n\nThe number: stockout rate 1.9% in September (baseline 3.6%).\n  Mississauga 1.6% · Calgary 2.3% · Moncton 1.8%\n\nNeeds a decision today\n  14 proposed POs waiting, $61,200 · oldest 3 h\n  3 exceptions: 1 supplier late (Kestrel), 2 overstock\n\nComing up\n  Fall clean-up sale Oct 12: 46 SKUs in the forecast, 6 POs drafted\n  Month-end freeze Sep 30 to Oct 2: watch only\n\nAsk me anything in this thread.</pre></div>' +
+      '<h3 class="h3" style="margin-top:16px">Thread</h3><div class="tx">' + th.map(function (c) {
+        return '<div class="ln ' + c[0] + '"><span class="sp">' + c[1] + '</span><span>' + c[2] + '</span><span class="ms">' + c[3] + '</span></div>';
+      }).join("") + '</div>' +
+      '<p class="note">Example brief and thread. Numbers illustrative.</p>');
+  };
+
+  /* 24. Security */
+  S.security = function () {
+    return portal("security",
+      '<h2 class="p-h">What the pod protects</h2><p class="p-sub">Enforced by the platform, not by wording in a prompt.</p>' +
+      '<div class="sec-grid">' +
+      '<div class="tile"><div class="k">Purchase orders</div><b style="color:var(--sf-navy)">Never placed by an agent</b><div class="d">The ERP write runs only with a planner&#39;s approval id</div></div>' +
+      '<div class="tile"><div class="k">Your systems</div><b style="color:var(--sf-navy)">Read-only</b><div class="d">ERP, WMS and EDI feeds are snapshots; nothing is written back</div></div>' +
+      '<div class="tile"><div class="k">Reorder rules and terms</div><b style="color:var(--sf-navy)">Change only when you change them</b><div class="d">No agent can edit a rule, a term or a schedule</div></div>' +
+      '<div class="tile"><div class="k">Every action</div><b style="color:var(--sf-navy)">Logged with reasoning, reversible</b><div class="d">Undo from the audit timeline; a rejected proposal leaves nothing in the ERP</div></div></div>' +
+      '<h3 class="h3">Held this month</h3>' + table(["When", "What was stopped", "By"], [
+        ["Sep 27 · 2:14 pm", "Candidate v13 rc1 drafted below MOQ on three cases. Blocked at the release gate", pill("n", "golden decisions")],
+        ["Sep 19 · 1:06 am", "A feed arrived with a customer email column. Column dropped before any model call; feed owner notified", pill("n", "data guard")],
+        ["Sep 9 · 6:00 am", "A proposal sat untouched for 24 hours. Escalated to the planning lead, not placed", pill("n", "approval gate")]]) +
+      '<p class="note">Only Harborline users see Harborline agents, proposals, terms and rules. Every change is in the activity log.</p>');
+  };
+
+  /* 25. Compliance */
+  S.compliance = function () {
+    var svg = '<svg viewBox="0 0 900 420" role="img" aria-label="Where your data goes during a run" font-family="Inter, sans-serif"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6B7B8D"/></marker></defs>' +
+      '<rect x="8" y="165" width="110" height="96" rx="9" fill="#F2F4F7" stroke="#DCE2EA" stroke-width="1.5"/><text x="63" y="194" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Your systems</text><text x="63" y="213" text-anchor="middle" font-size="12.5" fill="#6B7B8D">ERP, WMS, EDI</text><text x="63" y="232" text-anchor="middle" font-size="12.5" fill="#16A34A" font-weight="600">read-only</text>' +
+      '<rect x="132" y="30" width="500" height="370" rx="14" fill="#F5FAFF" stroke="#1A6FC4" stroke-width="1.6" stroke-dasharray="7 5"/><text x="150" y="56" font-size="13.5" font-weight="600" fill="#1A6FC4">Harborline pod · private, single client, Canada</text>' +
+      '<rect x="146" y="175" width="118" height="76" rx="9" fill="#fff" stroke="#1A6FC4" stroke-width="1.5"/><text x="205" y="209" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Agents</text><text x="205" y="228" text-anchor="middle" font-size="12.5" fill="#6B7B8D">read, draft, flag</text>' +
+      '<rect x="284" y="80" width="160" height="76" rx="9" fill="#fff" stroke="#16A34A" stroke-width="1.5"/><text x="364" y="114" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Data guard</text><text x="364" y="133" text-anchor="middle" font-size="12.5" fill="#6B7B8D">customer names removed</text>' +
+      '<rect x="284" y="280" width="160" height="76" rx="9" fill="#fff" stroke="#1A6FC4" stroke-width="1.5"/><text x="364" y="314" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Records</text><text x="364" y="333" text-anchor="middle" font-size="12.5" fill="#6B7B8D">proposals, audit log, encrypted</text>' +
+      '<rect x="462" y="80" width="156" height="76" rx="9" fill="#fff" stroke="#1A6FC4" stroke-width="1.5"/><text x="540" y="114" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Tool service</text><text x="540" y="133" text-anchor="middle" font-size="12.5" fill="#6B7B8D">keys held only here</text>' +
+      '<rect x="462" y="280" width="156" height="76" rx="9" fill="#fff" stroke="#1A6FC4" stroke-width="1.5"/><text x="540" y="314" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Your portal</text><text x="540" y="333" text-anchor="middle" font-size="12.5" fill="#6B7B8D">your planners only</text>' +
+      '<rect x="652" y="34" width="240" height="100" rx="9" fill="#fff" stroke="#DCE2EA" stroke-width="1.5"/><text x="772" y="71" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Your ERP</text><text x="772" y="90" text-anchor="middle" font-size="12.5" fill="#6B7B8D">approved POs only,</text><text x="772" y="109" text-anchor="middle" font-size="12.5" fill="#6B7B8D">after a person says yes</text>' +
+      '<rect x="652" y="158" width="240" height="120" rx="9" fill="#fff" stroke="#DCE2EA" stroke-width="1.5"/><text x="772" y="205" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">AI model</text><text x="772" y="224" text-anchor="middle" font-size="12.5" fill="#6B7B8D">our processor, under contract</text><text x="772" y="243" text-anchor="middle" font-size="12.5" fill="#16A34A" font-weight="600">no training · no retention</text>' +
+      '<rect x="652" y="300" width="240" height="100" rx="9" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.5"/><text x="772" y="337" text-anchor="middle" font-size="15" font-weight="600" fill="#991B1B">Never shared</text><text x="772" y="356" text-anchor="middle" font-size="12.5" fill="#991B1B" font-weight="600">suppliers, data brokers,</text><text x="772" y="375" text-anchor="middle" font-size="12.5" fill="#991B1B" font-weight="600">competitors, other clients</text>' +
+      '<line x1="118" y1="213" x2="144" y2="213" stroke="#6B7B8D" stroke-width="1.8" marker-end="url(#ar)"/><line x1="264" y1="198" x2="282" y2="140" stroke="#6B7B8D" stroke-width="1.8" marker-end="url(#ar)"/><line x1="264" y1="228" x2="282" y2="296" stroke="#6B7B8D" stroke-width="1.8" marker-end="url(#ar)"/><line x1="444" y1="118" x2="460" y2="118" stroke="#6B7B8D" stroke-width="1.8" marker-end="url(#ar)"/><line x1="444" y1="318" x2="460" y2="318" stroke="#6B7B8D" stroke-width="1.8" marker-end="url(#ar)"/>' +
+      '<line x1="618" y1="108" x2="650" y2="92" stroke="#6B7B8D" stroke-width="1.8" marker-end="url(#ar)"/>' +
+      '<line x1="444" y1="140" x2="650" y2="210" stroke="#16A34A" stroke-width="1.8" marker-end="url(#ar)"/><text x="452" y="202" font-size="12" font-weight="600" fill="#16A34A">SKU figures only</text>' +
+      '<line x1="632" y1="350" x2="650" y2="350" stroke="#DC2626" stroke-width="2.2" stroke-dasharray="4 3"/><text x="641" y="342" text-anchor="middle" font-size="15" font-weight="700" fill="#DC2626">&#10005;</text></svg>';
+    return portal("compliance",
+      '<h2 class="p-h">Compliance: where your data goes</h2><p class="p-sub">Every place your demand, stock and supplier data travels during a run, and where it never goes.</p>' +
+      '<div class="cdiag">' + svg + '</div>' +
+      '<div class="twocol" style="margin-top:16px"><div>' + table(["Commitment", "How it is enforced"], [
+        ["No data sold or shared with third parties", "Only the processor shown above, under contract"],
+        ["No model training on your data", "Contract terms and zero-retention settings"],
+        ["Customer identities never reach the model", "Data guard drops names, emails and account numbers from every feed"],
+        ["Your ERP is written only on a person&#39;s approval", "The write tool requires an approval id; agents cannot call it"],
+        ["Your retention, your export", "Set per record type; full export on request and on exit"]]) +
+      '</div><div class="side"><div class="tile"><div class="k">Processors</div><b style="color:var(--sf-navy)">1 listed, with a signed agreement</b><div class="d">the AI model</div></div>' +
+      '<div class="tile"><div class="k">Data location</div><b style="color:var(--sf-navy)">Canada</b><div class="d">records, snapshots, backups</div></div>' +
+      '<div class="tile"><div class="k">Audit</div><b style="color:var(--sf-navy)">Every read, action and change logged</b><div class="d">' + pill("b", "Download report") + '</div></div></div></div>');
+  };
+
+  /* 26. Faster and steadier */
+  S.reliability = function () {
+    return portal("home",
+      '<h2 class="p-h">Faster and steadier</h2><p class="p-sub">What the pod commits to, against replenishment run from a spreadsheet and one planner&#39;s head.</p>' +
+      table(["Measure", "Before: spreadsheet and one planner", "Pod commitment"], [
+        ["Reorder points revisited", "once, when they were set", "every night, per SKU and site"],
+        ["First sign of a stockout", "a customer calling", "flagged at least 24 h ahead, at the last safe order date"],
+        ["Drafting a PO", "30 to 45 min per supplier, three screens", "under 15 s, with reasoning; reviewed in about 4 min"],
+        ["A promotion", "a surprise at the warehouse", "in the forecast from the calendar, a week ahead"],
+        ["A supplier ships late", "found at receiving", "alert the day the PO goes past due"],
+        ["The planner is away", "no orders go out", "proposals keep coming; any approver in the portal"],
+        ["If the pod cannot run", "&ndash;", "your ERP reorder report is untouched; nothing depends on us"]], "cmp2") +
+      '<h3 class="h3" style="margin-top:16px">Alerts to your team</h3><div class="row">' +
+      tile("Feed failures", "0", "alert on any") + tile("Runs failed, 30 days", "0", "alert on any") + tile("Proposals untouched 24 h", "1", "alert on any") + tile("Exceptions unreviewed 48 h", "0", "alert on any") + '</div>' +
+      '<p class="note">Alert readings are examples.</p>');
+  };
+
+  /* 27. Close */
+  S.close = function () {
+    return portal("home",
+      '<h2 class="p-h">What the pod fixes</h2><p class="p-sub">Problems we see in mid-market distributors and brands, and how the pod removes each one.</p>' +
+      table(["In a spreadsheet and one planner&#39;s head", "In the pod"], [
+        ["Reorder points set once and never revisited", "Demand read nightly; cover recalculated every run"],
+        ["Promotions surprise the warehouse", "The calendar feeds the forecast a week ahead"],
+        ["The first sign of a stockout is a customer calling", "Flagged at least 24 h before, at the last safe order date"],
+        ["Supplier terms live in someone&#39;s inbox", "One terms record that always wins; a stale PDF cannot set a quantity"],
+        ["A PO built by hand from three screens", "Drafted with reasoning on every line; the planner decides"],
+        ["A late supplier noticed at receiving", "Alert the day a PO goes past due"],
+        ["Nobody can say how many stockouts last month", "Reported monthly, by site, with the baseline in writing"],
+        ["One planner away means no orders", "Proposals keep coming; any approver in the portal"],
+        ["Changes tested by running them live", "120 golden decisions and 18 months of runs replayed on every change"]]) +
+      '<div class="row" style="margin-top:16px">' + tile("Your ERP", "Unchanged", "reads only; approved POs in") + tile("Your reorder rules", "Yours", "they change when you change them") + tile("On exit", "Everything", "rules, documentation, full export, 30 days of help") + '</div>');
+  };
+
+  /* === POD SCREENS END === */
+
+  /* === POD BEATS START: narration per beat. Order = full walkthrough. === */
+  var W = "Harborline planning team";
+  var BEATS = [
+    { sect: "The pod", t: "Sign in where the team already works", s: "signin", who: W,
+      vo: "Harborline Supply is a sample client: a mid-market packaging and facility-supplies distributor with three warehouses and about two thousand sellable SKUs. Their planners sign in with the Microsoft or Google account they already use. Only people their admin adds can get in.",
+      p: "Nothing new to learn to get started." },
+    { sect: "The pod", t: "One pod for replenishment", s: "home", who: W,
+      vo: "This is the Replenishment pod: four agents that read demand, watch stock, draft purchase orders and flag exceptions. The month at a glance, what is live, what passed its quality gate, the proposals waiting for a planner, and the two runs someone should look at. Every PO waits for a person. The pod never places one.",
+      p: "Outcomes first, one view of the whole replenishment loop." },
+    { sect: "The pod", t: "The numbers it moves", s: "impact", who: W,
+      vo: "Start with the money. Lost sales avoided because a stockout was flagged in time and the stock arrived first. Excess stock trimmed because an overstock was caught before the PO was placed. Planner hours returned. Then every proposal: approved as drafted, or edited and rejected by a planner with the reason kept. Each metric is defined from tool results and decisions, so the client can add their own.",
+      p: "The business case, measured on every run." },
+    { sect: "The pod", t: "Every agent, and how it is doing", s: "agents", who: W,
+      vo: "A demand reader that runs nightly, a stock watch that runs hourly, a PO drafter that runs every weekday morning per supplier, and an exception flagger that never stops. Each one shows its schedule, its live version and what it produced this week. The drafter has nine tools and none of them can write to the ERP.",
+      p: "Four agents, one loop, no black box." },
+    { sect: "The pod", t: "See how the agent thinks", s: "flow", who: W,
+      vo: "All 42 steps of the drafter, grouped the way a planner talks about them. Click sizing and you see exactly what the agent is told about MOQs, pack sizes and price breaks, and where each answer leads. Three rules are enforced by the platform itself, not left to the prompt.",
+      p: "Transparency into every decision the agent can make." },
+    { sect: "The pod", t: "Runs on your calendar", s: "schedules", who: W,
+      vo: "When each agent runs and what it read last time. Here the team adds the month-end freeze: from September thirtieth to October second the pod watches but drafts nothing, and proposals resume on their own on the third. The cycle count and the holiday move requested deliveries. All of it applies to the next run.",
+      p: "Time-boxed changes without a release or a ticket." },
+    { sect: "The pod", t: "Your systems, read-only", s: "sources", who: W,
+      vo: "Every system the pod reads, how, and how often: the ERP nightly, the WMS hourly, EDI and POS daily, the supplier terms sheet on change. There is exactly one write, approved POs into the ERP, and it runs only when a planner clicks Approve. Never an agent, never a schedule, never a retry.",
+      p: "Read-only by design, with one write that a person triggers." },
+    { sect: "The pod", t: "Reorder rules, yours to set", s: "rules", who: W,
+      vo: "Service levels, safety stock, the overstock limit, what counts as a late supplier. The team lowers the overstock limit to fourteen weeks for the Q4 cash target, with a reason, and eleven open proposals are re-checked on the spot. Agents cannot change a rule. Every change records who and why.",
+      p: "The rules stay yours and change only when you change them." },
+    { sect: "A run, end to end", t: "A real run, as it happens", s: "run", who: W, anim: "list",
+      vo: "The six a.m. run for Ridgeway Packaging. The drafter reads last night's forecast, the stock position and the supplier terms. Stretch film has nine days of cover against a fourteen-day lead time and a promotion coming, so it orders eighteen hundred: enough cover, over the MOQ, and at the price break. It times delivery after the cycle count. Then it hands the proposal to the queue with reasoning on every line. Nothing is placed.",
+      p: "The agent does real analysis and stops at the decision." },
+    { sect: "A run, end to end", t: "Find any run in seconds", s: "search", who: W,
+      vo: "A sales rep asks why stretch film ran short at Calgary last week. Type the SKU, the supplier, a PO number, a run id or a planner's name into the search bar on any page. The item, its cover by site, every run that touched it and every decision comes up. One click opens the run.",
+      p: "From a question to the exact run in one search." },
+    { sect: "A run, end to end", t: "Everything about one proposal", s: "detail", who: W,
+      vo: "After the run: every line with its quantity and reasoning, what the agent read and when, and what the planner decided. Here they approved five lines as drafted and cut one because a cycle count is pending. The PO in the ERP carries the planner's name, the approval id and the reasoning. Undo is available until the goods are received.",
+      p: "Every purchase order is explainable after the fact." },
+    { sect: "A run, end to end", t: "Where every second went", s: "trace", who: W,
+      vo: "This is the trace for the Ridgeway run. The data reads, the terms lookup, the model sizing each line, the model writing the reasoning, and the write to the queue. Three quarters of the time is model time, which is exactly what the next version targets. When a run looks wrong, this shows what it read and in what order.",
+      p: "Full tracing across data, terms, model and your systems." },
+    { sect: "A run, end to end", t: "Every proposal gets a decision", s: "decisions", who: W, anim: "bars",
+      vo: "Eight hundred proposals in ninety days. Seventy-one percent approved as drafted, the rest edited or rejected with a reason recorded every time. Exceptions grouped by the rule that fired. And a finding: two thirds of rejections were for a supplier the planner already knew was changing, so a supplier note field is the next easy win.",
+      p: "Decisions become a roadmap, not a black hole." },
+    { sect: "Knowledge", t: "What the agents know, and when it was captured", s: "knowledge", who: W,
+      vo: "Supplier terms for all hundred and forty suppliers, the reorder policy, the promo calendar, the product master and the site calendars, each with an owner and a date. Documents show when they were captured. An old price list is excluded, because terms have their own record.",
+      p: "The client owns the knowledge, with dates and history." },
+    { sect: "Knowledge", t: "Test what a planner would ask", s: "ask", who: W,
+      vo: "Type the question a planner would ask and see exactly what the agent receives. For terms, the record wins every time, and the scorecard adds the buffer for a supplier that runs late. An old PDF that says ten days can never set a quantity.",
+      p: "Grounded answers, with the source on screen." },
+    { sect: "Knowledge", t: "Promotions the warehouse sees coming", s: "promos", who: W,
+      vo: "Sales adds the fall clean-up sale with its dates, its forty-six SKUs and the expected uplift. The demand reader raises those SKUs a week early, stock watch flags any that will not last the sale, and the drafter orders to promo pace. It is in tonight's run and ends by itself. No release, no ticket.",
+      p: "Self-service changes, live on the next run." },
+    { sect: "Quality", t: "Successful means the stock arrived", s: "review", who: W,
+      vo: "In a spreadsheet, a proposed order counts as done. The pod judges each run by what happened next: did a planner approve it without a large edit, was the PO created, and did the stock arrive before the projected stockout date. Failures land here, and any one of them can become a test.",
+      p: "Honest scoring, from outcomes, not from drafts." },
+    { sect: "Quality", t: "120 golden decisions from the client's own history", s: "golden", who: W,
+      vo: "These are real reorder decisions from eighteen months of the client's history, replayed against every new version. Seventy of them must pass every time: never place a PO, MOQ and pack rounding, lead time, promo uplift, freeze windows, reasoning on every line. We also replay every logged production run.",
+      p: "Evals built from real decisions, not generic tests." },
+    { sect: "Quality", t: "A cheaper version that is not ready", s: "gate1", who: W, anim: "bars",
+      vo: "Version thirteen swaps in a cheaper model for line sizing. Before it drafts a line it runs all one hundred and twenty. It drops to eighty-eight percent, and in three cases it orders below the supplier's minimum. It is blocked, and nobody can override that.",
+      p: "Consistency when models or prompts change." },
+    { sect: "Quality", t: "Fixed, proven, then live", s: "gate2", who: W, anim: "bars",
+      vo: "The fix makes MOQ rounding a flow step instead of a prompt line. Same one hundred and twenty decisions: ninety-eight percent, every must-pass case green, and runs two and a half times faster. The client sees the notes and the evidence before it goes live, and the previous version stays one step away.",
+      p: "Cheaper and safer, with proof, and one-step rollback." },
+    { sect: "Results", t: "The number, by site, every month", s: "analytics", who: W, anim: "bars",
+      vo: "Stockout rate: the share of SKU-days where a sellable item had zero stock at a site that sells it. The baseline is set in writing at the assessment. Here it is by site and by category against that baseline, reported on the first business day of every month. If it does not move for two months, the client gets a written remediation plan.",
+      p: "One number, reported monthly, against a baseline in writing." },
+    { sect: "Results", t: "What the agents completed", s: "completed", who: W, anim: "bars",
+      vo: "From two thousand SKUs watched to two hundred and three stockouts prevented, counted from tool results and decisions. Nine still happened, six of them supplier late. And findings that point at the next fix: one supplier behind most of the misses, and Calgary carrying two more weeks of cover than Mississauga on the same SKUs.",
+      p: "Numbers that tell you what to fix next." },
+    { sect: "Results", t: "The weekly brief, where the team already talks", s: "brief", who: W,
+      vo: "Every Monday the pod posts the stock brief to the team's channel: the number, what needs a decision today, what is coming. A planner asks which suppliers are late, gets three with the risk on each, and asks for a stopgap order from another supplier. The exception is queued and the proposal is drafted. Still nothing placed.",
+      p: "Ask it anything, and it acts inside the same rules." },
+    { sect: "Trust", t: "What the pod protects", s: "security", who: W,
+      vo: "No agent can place a PO; the ERP write needs a planner's approval id. The feeds are read-only. The rules and terms change only when the client changes them. Every action is logged with its reasoning and reversible. Here is what was stopped this month, including the release that failed its gate.",
+      p: "Security you can see, not just trust." },
+    { sect: "Trust", t: "Compliance: where your data goes", s: "compliance", who: W,
+      vo: "One picture of every place the client's demand, stock and supplier data travels. It stays inside a private pod and their own systems. The model sees SKU figures with customer names removed, under contract, with no training and no retention. Nothing goes to suppliers, data brokers, competitors or anyone else.",
+      p: "Privacy you can show your compliance team." },
+    { sect: "Trust", t: "Faster and steadier", s: "reliability", who: W,
+      vo: "What the pod commits to, against replenishment run from a spreadsheet and one planner's head: reorder points revisited nightly instead of once, stockouts seen a day ahead instead of by a customer call, POs drafted in seconds, and if the pod ever cannot run, the client's own ERP reorder report is untouched.",
+      p: "Commitments measured on every run." },
+    { sect: "Trust", t: "What the pod fixes", s: "close", who: W,
+      vo: "These are the problems we see in mid-market distributors, and how the pod removes each one. The client's ERP and reorder rules stay theirs; what they gain is a second brain for the planner, a quality gate on every change, and one number reported monthly with the baseline in writing.",
+      p: "Every purchase order proposed with its reasoning, every stockout seen before it happens." }
+  ];
+
+  var URLS = {
+    signin: "/sign-in", home: "/", impact: "/the-number/impact?range=30d", agents: "/agents", flow: "/agents/po-drafter/v12/flow?find=moq", schedules: "/agents/schedules", sources: "/knowledge/systems", rules: "/reorder-rules",
+    run: "/history/live/r_8c21", search: "/history/search?q=RP-4410", detail: "/history/r_8c21", trace: "/history/r_8c21/trace", decisions: "/proposed-pos/decisions?range=90d",
+    knowledge: "/knowledge", ask: "/knowledge/test?q=lead+time+ridgeway+stretch+film", promos: "/promotions?tab=upcoming", review: "/quality/review", golden: "/quality/golden-decisions", gate1: "/releases/v13-rc1", gate2: "/releases/v13-rc2",
+    analytics: "/the-number?month=2026-09", completed: "/the-number/completed?range=90d", brief: "/history/brief/2026-09-29", security: "/security", compliance: "/compliance", reliability: "/performance", close: "/"
+  };
+  /* === POD BEATS END === */
+
+  var i = 0, autoTimer = null, subTimer = null;
+  var screen = document.getElementById("screen");
+  var urlEl = document.getElementById("url");
+  var narrEl = document.getElementById("narr");
+  var beatsEl = document.getElementById("beats");
+  var counterEl = document.getElementById("counter");
+
+  /* POD:SHORT first-meeting path: 0-based beat indexes, 7 beats */
+  var SHORT = [1, 2, 8, 10, 12, 16, 23], shortMode = false;
+  function order() { return shortMode ? SHORT : BEATS.map(function (_, k) { return k; }); }
+  function pos() { return order().indexOf(i); }
+  function step(d) { var o = order(), p = pos(); if (p < 0) p = 0; else p = Math.max(0, Math.min(o.length - 1, p + d)); show(o[p]); }
+  function renderBeatList() {
+    var last = "";
+    beatsEl.innerHTML = (shortMode ? '<li class="sect">First meeting · 7 beats</li>' : "") + order().map(function (k, n) {
+      var b = BEATS[k], h = "";
+      if (!shortMode && b.sect !== last) { h += '<li class="sect">' + b.sect + "</li>"; last = b.sect; }
+      return h + '<li><button data-k="' + k + '" class="' + (k === i ? "on" : "") + '"><span class="n">' + (n + 1) + "</span><span>" + b.t + "</span></button></li>";
+    }).join("");
+  }
+
+  function reduced() { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+
+  function fillBars() {
+    var els = screen.querySelectorAll("[data-w]");
+    setTimeout(function () { Array.prototype.forEach.call(els, function (e) { e.style.width = e.getAttribute("data-w") + "%"; }); }, reduced() ? 0 : 120);
+  }
+
+  function animateList() {
+    var lis = screen.querySelectorAll("#anim .ln");
+    var n = 0;
+    function tick() {
+      if (n >= lis.length) return;
+      lis[n].classList.remove("pending");
+      n++;
+      subTimer = setTimeout(tick, reduced() ? 0 : 520);
+    }
+    tick();
+  }
+
+  function show(k) {
+    i = Math.max(0, Math.min(BEATS.length - 1, k));
+    var b = BEATS[i];
+    clearTimeout(subTimer);
+    screen.innerHTML = S[b.s]();
+    if (S[b.s].post) S[b.s].post();
+    urlEl.innerHTML = '<span class="lock">&#128274;</span>' + CLIENT.host + (URLS[b.s] || "/");
+    narrEl.innerHTML = '<div class="beat-no">Beat ' + (pos() + 1) + " of " + order().length + " · " + (shortMode ? "First meeting" : b.sect) + '</div><h2 class="beat-title">' + b.t + '</h2><div class="who">' + b.who + '</div><p class="vo">' + b.vo + '</p><div class="proves"><b>Shows:</b> ' + b.p + "</div>";
+    counterEl.textContent = (pos() + 1) + " / " + order().length;
+    renderBeatList();
+    var on = beatsEl.querySelector("button.on");
+    if (on) beatsEl.scrollTop = Math.max(0, on.parentNode.offsetTop - beatsEl.offsetTop - 120);
+    if (b.anim === "list") animateList();
+    fillBars();
+    try { history.replaceState(null, "", "#step" + (i + 1) + (shortMode ? "-first" : "")); } catch (e) {}
+  }
+
+  function setAuto(on) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+    document.getElementById("auto").setAttribute("aria-pressed", on ? "true" : "false");
+    if (on) autoTimer = setInterval(function () { var o = order(); if (pos() < o.length - 1) step(1); else setAuto(false); }, 11000);
+  }
+
+  document.getElementById("prev").addEventListener("click", function () { step(-1); });
+  document.getElementById("next").addEventListener("click", function () { step(1); });
+  var pathBtn = document.getElementById("pathbtn");
+  function setShort(on) { shortMode = on; pathBtn.setAttribute("aria-pressed", on ? "true" : "false"); pathBtn.textContent = on ? "Full walkthrough (" + BEATS.length + ")" : "First meeting (" + SHORT.length + ")"; if (on && SHORT.indexOf(i) < 0) show(SHORT[0]); else show(i); }
+  pathBtn.addEventListener("click", function () { setShort(!shortMode); });
+  document.getElementById("auto").addEventListener("click", function () { setAuto(!autoTimer); });
+  beatsEl.addEventListener("click", function (e) { var btn = e.target.closest("button[data-k]"); if (btn) show(+btn.getAttribute("data-k")); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight") step(1);
+    else if (e.key === "ArrowLeft") step(-1);
+    else if (e.key === "p" || e.key === "P") setAuto(!autoTimer);
+  });
+  function fromHash() { var m = /#step(\d+)/.exec(location.hash); return m ? +m[1] - 1 : 0; }
+  window.addEventListener("hashchange", function () { var k = fromHash(); if (k !== i) show(k); });
+  if (/-first|#first/.test(location.hash)) { shortMode = true; pathBtn.setAttribute("aria-pressed", "true"); pathBtn.textContent = "Full walkthrough (" + BEATS.length + ")"; }
+  var k0 = /#step\d+/.test(location.hash) ? fromHash() : (shortMode ? SHORT[0] : 0);
+  show(k0);
+})();
+</script>
+
+</body>
+</html>
