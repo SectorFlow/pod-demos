@@ -399,6 +399,7 @@
     <span class="counter" id="counter">1 / 27</span>
     <button class="btn primary" id="next" aria-label="Next beat">Next</button>
     <button class="btn" id="auto" aria-pressed="false">Autoplay</button>
+    <button class="btn" id="pathbtn" aria-pressed="false" title="Short path for first meetings">First meeting (7)</button>
   </div>
 </header>
 
@@ -408,7 +409,7 @@
     <div class="card">
       <ul class="beats" id="beats"></ul>
     </div>
-    <p class="hint">Keys: <kbd>←</kbd> <kbd>→</kbd> step, <kbd>P</kbd> autoplay. Link to a beat with <span class="mono">#step5</span>. Brightleaf Wellness is a fictional sample client. All data is illustrative.</p>
+    <p class="hint">Keys: <kbd>←</kbd> <kbd>→</kbd> step, <kbd>P</kbd> autoplay. Link to a beat with <span class="mono">#step5</span>; add <span class="mono">-first</span> for the short path. Brightleaf Wellness is a fictional sample client. All data is illustrative.</p>
   </aside>
 
   <section class="frame" aria-label="Product screen">
@@ -1053,12 +1054,17 @@
   var beatsEl = document.getElementById("beats");
   var counterEl = document.getElementById("counter");
 
+  /* POD:SHORT first-meeting path: 0-based beat indexes, 7 beats */
+  var SHORT = [1, 2, 8, 10, 12, 16, 23], shortMode = false;
+  function order() { return shortMode ? SHORT : BEATS.map(function (_, k) { return k; }); }
+  function pos() { return order().indexOf(i); }
+  function step(d) { var o = order(), p = pos(); if (p < 0) p = 0; else p = Math.max(0, Math.min(o.length - 1, p + d)); show(o[p]); }
   function renderBeatList() {
     var last = "";
-    beatsEl.innerHTML = BEATS.map(function (b, k) {
-      var h = "";
-      if (b.sect !== last) { h += '<li class="sect">' + b.sect + "</li>"; last = b.sect; }
-      return h + '<li><button data-k="' + k + '" class="' + (k === i ? "on" : "") + '"><span class="n">' + (k + 1) + "</span><span>" + b.t + "</span></button></li>";
+    beatsEl.innerHTML = (shortMode ? '<li class="sect">First meeting · 7 beats</li>' : "") + order().map(function (k, n) {
+      var b = BEATS[k], h = "";
+      if (!shortMode && b.sect !== last) { h += '<li class="sect">' + b.sect + "</li>"; last = b.sect; }
+      return h + '<li><button data-k="' + k + '" class="' + (k === i ? "on" : "") + '"><span class="n">' + (n + 1) + "</span><span>" + b.t + "</span></button></li>";
     }).join("");
   }
 
@@ -1088,35 +1094,40 @@
     screen.innerHTML = S[b.s]();
     if (S[b.s].post) S[b.s].post();
     urlEl.innerHTML = '<span class="lock">&#128274;</span>brightleaf.sectorflow.ai' + (URLS[b.s] || "/");
-    narrEl.innerHTML = '<div class="beat-no">Beat ' + (i + 1) + " of " + BEATS.length + " · " + b.sect + '</div><h2 class="beat-title">' + b.t + '</h2><div class="who">' + b.who + '</div><p class="vo">' + b.vo + '</p><div class="proves"><b>Shows:</b> ' + b.p + "</div>";
-    counterEl.textContent = (i + 1) + " / " + BEATS.length;
+    narrEl.innerHTML = '<div class="beat-no">Beat ' + (pos() + 1) + " of " + order().length + " · " + (shortMode ? "First meeting" : b.sect) + '</div><h2 class="beat-title">' + b.t + '</h2><div class="who">' + b.who + '</div><p class="vo">' + b.vo + '</p><div class="proves"><b>Shows:</b> ' + b.p + "</div>";
+    counterEl.textContent = (pos() + 1) + " / " + order().length;
     renderBeatList();
     var on = beatsEl.querySelector("button.on");
     if (on) beatsEl.scrollTop = Math.max(0, on.parentNode.offsetTop - beatsEl.offsetTop - 120);
     if (b.anim === "list") animateList();
     fillBars();
-    try { history.replaceState(null, "", "#step" + (i + 1)); } catch (e) {}
+    try { history.replaceState(null, "", "#step" + (i + 1) + (shortMode ? "-first" : "")); } catch (e) {}
   }
 
   function setAuto(on) {
     clearInterval(autoTimer);
     autoTimer = null;
     document.getElementById("auto").setAttribute("aria-pressed", on ? "true" : "false");
-    if (on) autoTimer = setInterval(function () { if (i < BEATS.length - 1) show(i + 1); else setAuto(false); }, 11000);
+    if (on) autoTimer = setInterval(function () { var o = order(); if (pos() < o.length - 1) step(1); else setAuto(false); }, 11000);
   }
 
-  document.getElementById("prev").addEventListener("click", function () { show(i - 1); });
-  document.getElementById("next").addEventListener("click", function () { show(i + 1); });
+  document.getElementById("prev").addEventListener("click", function () { step(-1); });
+  document.getElementById("next").addEventListener("click", function () { step(1); });
+  var pathBtn = document.getElementById("pathbtn");
+  function setShort(on) { shortMode = on; pathBtn.setAttribute("aria-pressed", on ? "true" : "false"); pathBtn.textContent = on ? "Full walkthrough (" + BEATS.length + ")" : "First meeting (" + SHORT.length + ")"; if (on && SHORT.indexOf(i) < 0) show(SHORT[0]); else show(i); }
+  pathBtn.addEventListener("click", function () { setShort(!shortMode); });
   document.getElementById("auto").addEventListener("click", function () { setAuto(!autoTimer); });
   beatsEl.addEventListener("click", function (e) { var btn = e.target.closest("button[data-k]"); if (btn) show(+btn.getAttribute("data-k")); });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "ArrowRight") show(i + 1);
-    else if (e.key === "ArrowLeft") show(i - 1);
+    if (e.key === "ArrowRight") step(1);
+    else if (e.key === "ArrowLeft") step(-1);
     else if (e.key === "p" || e.key === "P") setAuto(!autoTimer);
   });
   function fromHash() { var m = /#step(\d+)/.exec(location.hash); return m ? +m[1] - 1 : 0; }
   window.addEventListener("hashchange", function () { var k = fromHash(); if (k !== i) show(k); });
-  show(fromHash());
+  if (/-first|#first/.test(location.hash)) { shortMode = true; pathBtn.setAttribute("aria-pressed", "true"); pathBtn.textContent = "Full walkthrough (" + BEATS.length + ")"; }
+  var k0 = /#step\d+/.test(location.hash) ? fromHash() : (shortMode ? SHORT[0] : 0);
+  show(k0);
 })();
 </script>
 
