@@ -8,6 +8,7 @@ Usage:
 Takes the two pages produced by the pod design kit (fragments starting with <title>),
 wraps each as a full HTML document with noindex, writes them to <slug>/demo.html and
 <slug>/architecture.html, adds or replaces the pod's card on index.html, and commits.
+The architecture page is unlisted: no link on the site, reachable only by its URL.
 Run from the repo root. Re-running for the same slug replaces the pages and the card.
 """
 import argparse, html, pathlib, re, subprocess, sys
@@ -43,7 +44,6 @@ def card(slug, name, tagline, beats):
             f'    <div class="links">\n'
             f'      <a class="primary" href="{e(slug)}/demo.html">Demo walkthrough ({beats} beats)</a>\n'
             f'      <a href="{e(slug)}/demo.html#step2-first">First meeting (7 beats)</a>\n'
-            f'      <a href="{e(slug)}/architecture.html">Architecture and releases</a>\n'
             f'    </div>\n'
             f'  </div>\n')
 

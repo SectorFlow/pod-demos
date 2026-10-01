@@ -2,6 +2,8 @@
 
 Static site served by GitHub Pages. One folder per pod, each with `demo.html` (client walkthrough) and `architecture.html`.
 
+`architecture.html` is for SectorFlow to work from and is unlisted: nothing on the site links to it, and it is reachable only by typing `<slug>/architecture.html`. The repo is public, so treat it as discoverable, not secret. The customer-facing page is `how-a-pod-works.html`, linked from the index and shared by every pod.
+
 - `index.html` lists every pod. Add a card when a pod folder is added.
 - Pages are single self-contained files built from the pod design kit in `one/cowork/pod-design-kit`. Do not hand-edit them here; rebuild from the kit and copy over.
 - Every page carries `noindex, nofollow`.

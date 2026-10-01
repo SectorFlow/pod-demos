@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>How a SectorFlow pod works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root { --primary: #1A6FC4; --navy: #0B1628; --slate: #3A4A5C; --mid: #6B7B8D; --line: #DCE2EA; --off: #FAFBFC; --soft: #E8F1FB; --ok: #16A34A; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--off); color: var(--slate); font: 15px/1.55 Inter, system-ui, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 40px 20px 64px; }
+  .brand { font-weight: 700; font-size: 20px; color: var(--navy); letter-spacing: -.01em; }
+  .brand span { color: var(--primary); font-weight: 400; }
+  .back { font-size: 13px; color: var(--primary); text-decoration: none; margin-left: 14px; }
+  h1 { font-size: 28px; color: var(--navy); margin: 26px 0 6px; }
+  h2 { font-size: 19px; color: var(--navy); margin: 36px 0 10px; }
+  p.lead { color: var(--mid); margin: 0 0 24px; max-width: 720px; }
+  figure { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px; overflow-x: auto; }
+  figure svg { display: block; width: 100%; min-width: 820px; height: auto; font-family: Inter, system-ui, sans-serif; }
+  figcaption { color: var(--mid); font-size: 13.5px; margin-top: 10px; max-width: 820px; }
+  .tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--mid); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 600; color: var(--navy); white-space: nowrap; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .tile { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .tile b { display: block; color: var(--navy); font-size: 14px; margin-bottom: 4px; }
+  .tile span { font-size: 13.5px; color: var(--slate); }
+  .note { font-size: 12.5px; color: var(--mid); margin-top: 28px; }
+  @media (max-width: 720px) { td:first-child { white-space: normal; } }
+</style>
+</head>
+<body>
+<main>
+  <div><span class="brand">Sector<span>Flow</span></span><a class="back" href="index.html">All pod demos</a></div>
+  <h1>How a SectorFlow pod works</h1>
+  <p class="lead">A pod is a small set of AI agents built for one job in your business, running in a private space of its own. Your team stays in charge of every decision that matters. This page applies to every pod we build.</p>
+
+  <figure>
+    <svg viewBox="0 0 1100 520" role="img" aria-label="How a pod sits between your team, your systems and the AI model">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7B8D"/></marker>
+        <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#16A34A"/></marker>
+      </defs>
+      <rect x="10" y="170" width="160" height="150" rx="10" fill="#F2F4F7" stroke="#DCE2EA" stroke-width="1.5"/>
+      <text x="90.0" y="200" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Your team</text>
+      <text x="90.0" y="222" text-anchor="middle" font-size="12.5" fill="#6B7B8D">signs in with the</text>
+      <text x="90.0" y="240" text-anchor="middle" font-size="12.5" fill="#6B7B8D">accounts you already use</text>
+      <text x="90.0" y="264" text-anchor="middle" font-size="12.5" fill="#6B7B8D">portal, Teams or Slack,</text>
+      <text x="90.0" y="282" text-anchor="middle" font-size="12.5" fill="#6B7B8D">email, phone</text>
+      <rect x="230" y="24" width="560" height="470" rx="16" fill="#F5FAFF" stroke="#1A6FC4" stroke-width="1.8" stroke-dasharray="8 5"/>
+      <text x="252" y="52" font-size="14" font-weight="700" fill="#1A6FC4">YOUR POD</text>
+      <text x="252" y="72" font-size="12.5" fill="#1A6FC4">private to you · one client per pod · built from a tested template</text>
+      <rect x="254" y="94" width="250" height="104" rx="10" fill="#fff" stroke="#1A6FC4" stroke-width="1.5"/>
+      <text x="379.0" y="124" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Agents</text>
+      <text x="379.0" y="146" text-anchor="middle" font-size="12.5" fill="#6B7B8D">read, calculate, draft and flag</text>
+      <text x="379.0" y="164" text-anchor="middle" font-size="12.5" fill="#6B7B8D">built for your work, not generic</text>
+      <text x="379.0" y="182" text-anchor="middle" font-size="12.5" font-weight="600" fill="#16A34A">a person decides what matters</text>
+      <rect x="528" y="94" width="250" height="104" rx="10" fill="#fff" stroke="#1A6FC4" stroke-width="1.5"/>
+      <text x="653.0" y="124" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Your rules and knowledge</text>
+      <text x="653.0" y="146" text-anchor="middle" font-size="12.5" fill="#6B7B8D">policies, terms, calendars, limits</text>
+      <text x="653.0" y="164" text-anchor="middle" font-size="12.5" fill="#6B7B8D">you change them in the portal</text>
+      <text x="653.0" y="182" text-anchor="middle" font-size="12.5" font-weight="600" fill="#16A34A">live on the next run, no release</text>
+      <rect x="254" y="220" width="250" height="104" rx="10" fill="#fff" stroke="#1A6FC4" stroke-width="1.5"/>
+      <text x="379.0" y="250" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Quality gate</text>
+      <text x="379.0" y="272" text-anchor="middle" font-size="12.5" fill="#6B7B8D">real cases from your history,</text>
+      <text x="379.0" y="290" text-anchor="middle" font-size="12.5" fill="#6B7B8D">replayed on every change</text>
+      <text x="379.0" y="308" text-anchor="middle" font-size="12.5" font-weight="600" fill="#16A34A">a worse version cannot go live</text>
+      <rect x="528" y="220" width="250" height="104" rx="10" fill="#fff" stroke="#1A6FC4" stroke-width="1.5"/>
+      <text x="653.0" y="250" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Audit log</text>
+      <text x="653.0" y="272" text-anchor="middle" font-size="12.5" fill="#6B7B8D">every action, with its reasoning</text>
+      <text x="653.0" y="290" text-anchor="middle" font-size="12.5" fill="#6B7B8D">searchable by your team</text>
+      <text x="653.0" y="308" text-anchor="middle" font-size="12.5" font-weight="600" fill="#16A34A">reversible</text>
+      <rect x="254" y="346" width="524" height="120" rx="10" fill="#fff" stroke="#1A6FC4" stroke-width="1.5"/>
+      <text x="516.0" y="376" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Your portal</text>
+      <text x="516.0" y="398" text-anchor="middle" font-size="12.5" fill="#6B7B8D">what is waiting for a decision · every run and its outcome · exceptions</text>
+      <text x="516.0" y="416" text-anchor="middle" font-size="12.5" fill="#6B7B8D">the number, reported monthly · your people only, with roles you set</text>
+      <text x="516.0" y="440" text-anchor="middle" font-size="12.5" font-weight="600" fill="#16A34A">one number, against a baseline agreed in writing</text>
+      <rect x="880" y="70" width="210" height="112" rx="10" fill="#fff" stroke="#DCE2EA" stroke-width="1.5"/>
+      <text x="985.0" y="100" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">Your systems</text>
+      <text x="985.0" y="122" text-anchor="middle" font-size="12.5" fill="#6B7B8D">ERP, CRM, WMS, phone,</text>
+      <text x="985.0" y="140" text-anchor="middle" font-size="12.5" fill="#6B7B8D">email, ticketing</text>
+      <text x="985.0" y="158" text-anchor="middle" font-size="12.5" font-weight="600" fill="#16A34A">unchanged, still yours</text>
+      <rect x="880" y="206" width="210" height="124" rx="10" fill="#fff" stroke="#DCE2EA" stroke-width="1.5"/>
+      <text x="985.0" y="236" text-anchor="middle" font-size="15" font-weight="600" fill="#0B1628">AI model</text>
+      <text x="985.0" y="258" text-anchor="middle" font-size="12.5" fill="#6B7B8D">a processor under contract</text>
+      <text x="985.0" y="276" text-anchor="middle" font-size="12.5" fill="#6B7B8D">sees only what the task needs</text>
+      <text x="985.0" y="294" text-anchor="middle" font-size="12.5" font-weight="600" fill="#16A34A">no training · no retention</text>
+      <text x="985.0" y="312" text-anchor="middle" font-size="12.5" font-weight="600" fill="#16A34A">swapped without a rebuild</text>
+      <rect x="880" y="354" width="210" height="106" rx="10" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.5"/>
+      <text x="985.0" y="384" text-anchor="middle" font-size="15" font-weight="600" fill="#991B1B">Never shared</text>
+      <text x="985.0" y="406" text-anchor="middle" font-size="12.5" font-weight="600" fill="#991B1B">advertisers, data brokers,</text>
+      <text x="985.0" y="424" text-anchor="middle" font-size="12.5" font-weight="600" fill="#991B1B">other clients, anyone else</text>
+      <text x="985.0" y="442" text-anchor="middle" font-size="12.5" font-weight="600" fill="#991B1B">not even in aggregate</text>
+      <line x1="170" y1="205" x2="252" y2="150" stroke="#6B7B8D" stroke-width="1.8" marker-end="url(#ar)"/>
+      <text x="10" y="156" font-size="11.5" fill="#6B7B8D">asks, approves, edits, rejects</text>
+      <line x1="170" y1="290" x2="252" y2="400" stroke="#6B7B8D" stroke-width="1.8" marker-end="url(#ar)" marker-start="url(#ar)"/>
+      <text x="10" y="344" font-size="11.5" fill="#6B7B8D">reviews, reports, questions</text>
+      <line x1="780" y1="126" x2="878" y2="126" stroke="#6B7B8D" stroke-width="1.8" marker-end="url(#ar)" marker-start="url(#ar)"/>
+      <text x="829" y="114" text-anchor="middle" font-size="11" fill="#6B7B8D">reads</text>
+      <text x="829" y="143" text-anchor="middle" font-size="11" fill="#16A34A" font-weight="600">writes only</text>
+      <text x="829" y="156" text-anchor="middle" font-size="11" fill="#16A34A" font-weight="600">on approval</text>
+      <line x1="780" y1="268" x2="878" y2="268" stroke="#16A34A" stroke-width="1.8" marker-end="url(#ag)" marker-start="url(#ag)"/>
+      <text x="829" y="256" text-anchor="middle" font-size="11" fill="#16A34A" font-weight="600">identifiers</text>
+      <text x="829" y="285" text-anchor="middle" font-size="11" fill="#16A34A" font-weight="600">removed</text>
+      <line x1="846" y1="407" x2="870" y2="407" stroke="#DC2626" stroke-width="2.2" stroke-dasharray="4 3"/>
+      <text x="858" y="399" text-anchor="middle" font-size="15" font-weight="700" fill="#DC2626">&#10005;</text>
+    </svg>
+    <figcaption>Agents do the reading, calculating and drafting. Anything that changes money, a customer or a record in your systems waits for a person unless you decide otherwise, and every action is logged with the reason behind it. Your systems stay as they are; the pod connects to them, it does not replace them.</figcaption>
+  </figure>
+
+  <h2>What stays yours</h2>
+  <div class="grid">
+    <div class="tile"><b>Your systems and your data</b><span>The pod reads from them and writes back only where you have approved. Nothing is copied into a product you do not control.</span></div>
+    <div class="tile"><b>Every decision</b><span>Approvals, edits and rejections are made by your team, in your portal or in the channel you already use.</span></div>
+    <div class="tile"><b>Your rules</b><span>Policies, limits, terms and calendars change only when you change them. No agent can edit a rule.</span></div>
+    <div class="tile"><b>On exit</b><span>Your records, the audit log, the rules and the documentation come with you, with a transition period to hand over.</span></div>
+  </div>
+
+  <h2>Where it runs</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Option</th><th>What it means</th><th>Usually chosen by</th></tr></thead>
+    <tbody>
+      <tr><td>Private pod (default)</td><td>Your pod runs in its own space with its own data. The platform underneath is shared with other clients, with every record scoped to you.</td><td>Most clients: fastest to start, lowest cost</td></tr>
+      <tr><td>Dedicated</td><td>Your pod and a dedicated copy of the platform, used by you alone, run and kept patched by SectorFlow.</td><td>Clients who need nothing shared</td></tr>
+      <tr><td>In your own cloud</td><td>The same pod deployed inside your own cloud account. SectorFlow ships updates through the same quality gate.</td><td>Regulated clients, or data that cannot leave your account</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>How changes reach you</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Change</th><th>How it goes live</th></tr></thead>
+    <tbody>
+      <tr><td>Content you own</td><td>Rules, terms, calendars, messages and knowledge are saved in the portal and apply on the next run. Every change is versioned and in the audit log.</td></tr>
+      <tr><td>How an agent behaves</td><td>A new version is built, then replayed against real cases from your own history. It only goes live after you have seen the result, and the previous version stays one step away.</td></tr>
+      <tr><td>The AI model itself</td><td>Models are swapped behind the pod without a rebuild, and go through the same gate as any other change.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>What we never do</h2>
+  <div class="grid">
+    <div class="tile"><b>Train on your data</b><span>The model provider is under contract with no training and no retention. Your data is not used to improve anything for anyone else.</span></div>
+    <div class="tile"><b>Share or sell it</b><span>No advertisers, data brokers, analytics vendors or other clients, in any form.</span></div>
+    <div class="tile"><b>Let an agent act alone where it matters</b><span>Money, customers and records in your systems wait for a person. Where you choose to automate, the limits are yours and logged.</span></div>
+    <div class="tile"><b>Ship an untested change</b><span>Every version passes your own cases first. A worse version is blocked, and no one can override the gate.</span></div>
+  </div>
+
+  <p class="note">Hosting region, retention periods and the list of processors are confirmed in writing for each client before go-live.</p>
+</main>
+</body>
+</html>
